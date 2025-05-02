@@ -3,6 +3,7 @@ import { getCurrentTheme, setTheme } from '~/shared/theme/theme';
 import { useInitAppProvider } from './model/hooks/hooks';
 import { nextAnimFrame } from '~/shared/helpers/functions';
 import type { IModalStorage } from './model/types/types';
+import { unlockScroll } from '~/shared/helpers/lock_scroll';
 
 const appProviderStore = useInitAppProvider();
 
@@ -62,6 +63,7 @@ useNuxtApp().hook('page:start', () => {
 
 useNuxtApp().hook('page:transition:finish', () => {
     nextAnimFrame(() => {
+        unlockScroll();
         if (route.hash.length === 0) {
             window.scrollTo({ top: -100 });
         }

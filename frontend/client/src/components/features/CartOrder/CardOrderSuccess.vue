@@ -1,5 +1,8 @@
 <script setup lang="ts">
-defineProps<{ orderID: number; link: string }>();
+defineProps<{
+    orderID: number;
+    link: string;
+}>();
 </script>
 
 <template>
@@ -8,7 +11,8 @@ defineProps<{ orderID: number; link: string }>();
         <br />
         Наши специалисты свяжутся с Вами в ближайшее время.<br />
         <br />
-        Следить за заказом можно <NuxtLink :to="link">по ссылке</NuxtLink>.
+        Следить за заказом можно
+        <NuxtLink :to="link">по ссылке</NuxtLink>.
     </div>
 </template>
 
