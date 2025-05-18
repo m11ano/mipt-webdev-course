@@ -4,16 +4,18 @@ definitions:
     properties:
       full_description:
         type: string
-      image_preview_id:
+      image_preview_file_id:
         type: string
       is_published:
         type: boolean
       name:
+        maxLength: 150
+        minLength: 1
         type: string
       price:
         minimum: 0
-        type: integer
-      slider_images_ids:
+        type: number
+      slider_files_ids:
         items:
           type: string
         minItems: 1
@@ -22,7 +24,7 @@ definitions:
         minimum: 0
         type: integer
     required:
-    - image_preview_id
+    - image_preview_file_id
     - name
     type: object
   controller.CreateProductOut:
@@ -43,7 +45,7 @@ definitions:
       name:
         type: string
       price:
-        type: integer
+        type: number
       slider:
         items:
           type: string
@@ -69,7 +71,7 @@ definitions:
       name:
         type: string
       price:
-        type: integer
+        type: number
       stock_available:
         type: integer
     type: object
@@ -77,30 +79,44 @@ definitions:
     properties:
       full_description:
         type: string
-      image_preview_id:
+      image_preview_file_id:
         type: string
       is_published:
         type: boolean
       name:
+        maxLength: 150
+        minLength: 1
         type: string
       price:
         minimum: 0
-        type: integer
-      slider_images_ids:
+        type: number
+      slider_files_ids:
         items:
           type: string
         minItems: 1
         type: array
-      stock_available:
-        minimum: 0
+    required:
+    - image_preview_file_id
+    - name
+    type: object
+  controller.UpdateProductStockIn:
+    properties:
+      operation:
+        enum:
+        - increase
+        - decrease
+        type: string
+      value:
+        minimum: 1
         type: integer
     required:
-    - image_preview_id
-    - name
+    - operation
     type: object
   controller.UploadImageOut:
     properties:
       id:
+        type: string
+      url:
         type: string
     type: object
   middleware.ErrorJSON:
@@ -247,6 +263,36 @@ paths:
       summary: Редактировать продукт
       tags:
       - products
+  /products/{id}/stock:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateProductStockIn'
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Изменить остаток товара на складе
+      tags:
+      - products
   /products/image:
     post:
       consumes:
@@ -257,7 +303,7 @@ paths:
         name: file
         required: true
         type: file
-      - description: Тип изображения
+      - description: 'Тип изображения, enum: preview, slider'
         in: formData
         name: image_type
         required: true

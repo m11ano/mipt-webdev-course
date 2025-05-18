@@ -25,7 +25,7 @@ var imageTypes = map[string]domain.FileTarget{
 // @Tags products
 // @Accept  multipart/form-data
 // @Param file formData file true "Файл изображения"
-// @Param image_type formData string true "Тип изображения"
+// @Param image_type formData string true "Тип изображения, enum: preview, slider"
 // @Success 200 {object} UploadImageOut
 // @Failure 400 {object} middleware.ErrorJSON
 // @Router /products/image [post]

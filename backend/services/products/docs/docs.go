@@ -126,7 +126,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Тип изображения",
+                        "description": "Тип изображения, enum: preview, slider",
                         "name": "image_type",
                         "in": "formData",
                         "required": true
@@ -261,33 +261,83 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/products/{id}/stock": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Изменить остаток товара на складе",
+                "parameters": [
+                    {
+                        "description": "JSON",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProductStockIn"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "controller.CreateProductIn": {
             "type": "object",
             "required": [
-                "image_preview_id",
+                "image_preview_file_id",
                 "name"
             ],
             "properties": {
                 "full_description": {
                     "type": "string"
                 },
-                "image_preview_id": {
+                "image_preview_file_id": {
                     "type": "string"
                 },
                 "is_published": {
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
                 },
                 "price": {
-                    "type": "integer",
+                    "type": "number",
                     "minimum": 0
                 },
-                "slider_images_ids": {
+                "slider_files_ids": {
                     "type": "array",
                     "minItems": 1,
                     "items": {
@@ -327,7 +377,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "slider": {
                     "type": "array",
@@ -367,7 +417,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "stock_available": {
                     "type": "integer"
@@ -377,36 +427,53 @@ const docTemplate = `{
         "controller.UpdateProductIn": {
             "type": "object",
             "required": [
-                "image_preview_id",
+                "image_preview_file_id",
                 "name"
             ],
             "properties": {
                 "full_description": {
                     "type": "string"
                 },
-                "image_preview_id": {
+                "image_preview_file_id": {
                     "type": "string"
                 },
                 "is_published": {
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
                 },
                 "price": {
-                    "type": "integer",
+                    "type": "number",
                     "minimum": 0
                 },
-                "slider_images_ids": {
+                "slider_files_ids": {
                     "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "controller.UpdateProductStockIn": {
+            "type": "object",
+            "required": [
+                "operation"
+            ],
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "enum": [
+                        "increase",
+                        "decrease"
+                    ]
                 },
-                "stock_available": {
+                "value": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 1
                 }
             }
         },
@@ -414,6 +481,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
