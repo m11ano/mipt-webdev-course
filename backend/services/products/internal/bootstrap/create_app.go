@@ -15,6 +15,7 @@ import (
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/storage"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/storage/s3d"
 	"go.uber.org/fx"
+	"google.golang.org/grpc"
 )
 
 var App = fx.Options(
@@ -33,8 +34,9 @@ var App = fx.Options(
 	ProductOrderBlockModule,
 	// Delivery
 	DeliveryHTTP,
+	DeliveryGRPC,
 	// Start && Stop invoke
-	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, s3Client *s3.Client, storageClient storage.Client) {
+	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, s3Client *s3.Client, storageClient storage.Client, grpcServer *grpc.Server) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				err := Pgxv5TestConnection(ctx, dbpool, logger, config.DB.MaxAttempt, config.DB.AttemptSleepSeconds)
@@ -60,6 +62,10 @@ var App = fx.Options(
 				}
 				logger.Info("Storage buckets created")
 
+				if config.GRPC.Port > 0 {
+					go StartGRPCServer(grpcServer, config, logger, shutdowner)
+				}
+
 				if config.HTTP.Port > 0 {
 					go func() {
 						if err := fiberApp.Listen(fmt.Sprintf(":%d", config.HTTP.Port)); err != nil {
@@ -81,6 +87,11 @@ var App = fx.Options(
 					if err != nil {
 						logger.Error("failed to stop fiber", slog.Any("error", err), slog.Any("trackeback", string(debug.Stack())))
 					}
+				}
+
+				if config.GRPC.Port > 0 {
+					logger.Info("stopping gRPC server")
+					grpcServer.GracefulStop()
 				}
 
 				logger.Info("stopping Postgress")

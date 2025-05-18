@@ -72,6 +72,7 @@ type ProductFullOut struct {
 //go:generate mockery --name=Product --output=../../tests/mocks --case=underscore
 type Product interface {
 	FindFullPagedList(ctx context.Context, listOptions ProductListOptions, queryParams *uctypes.QueryGetListParams) (out []*ProductFullOut, total int64, err error)
+	FindFullList(ctx context.Context, listOptions ProductListOptions, queryParams *uctypes.QueryGetListParams) (out []*ProductFullOut, err error)
 	FindOneFullByID(ctx context.Context, id int64, queryParams *uctypes.QueryGetOneParams) (out *ProductOneFullOut, err error)
 	Create(ctx context.Context, input ProductCreateIn) (product *domain.Product, slider []*domain.ProductSliderImage, err error)
 	Update(ctx context.Context, id int64, input ProductUpdateIn) (product *domain.Product, slider []*domain.ProductSliderImage, err error)
@@ -150,6 +151,44 @@ func (uc *ProductInpl) FindFullPagedList(ctx context.Context, listOptions Produc
 	}
 
 	return result, total, nil
+}
+
+func (uc *ProductInpl) FindFullList(ctx context.Context, listOptions ProductListOptions, queryParams *uctypes.QueryGetListParams) ([]*ProductFullOut, error) {
+
+	list, err := uc.repo.FindList(ctx, listOptions, queryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	fileIDs := make([]uuid.UUID, 0, len(list))
+	for _, item := range list {
+		if item.ImagePreviewFileID != nil {
+			fileIDs = append(fileIDs, *item.ImagePreviewFileID)
+		}
+	}
+
+	files, err := uc.fileUC.FindListInMap(ctx, FileListOptions{
+		IDs: &fileIDs,
+	}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*ProductFullOut, len(list))
+	for i, item := range list {
+		result[i] = &ProductFullOut{
+			Product: item,
+		}
+
+		if item.ImagePreviewFileID != nil {
+			file, ok := files[*item.ImagePreviewFileID]
+			if ok {
+				result[i].ProductPreviewFile = file
+			}
+		}
+	}
+
+	return result, nil
 }
 
 func (uc *ProductInpl) FindOneFullByID(ctx context.Context, id int64, queryParams *uctypes.QueryGetOneParams) (*ProductOneFullOut, error) {

@@ -41,6 +41,9 @@ type Config struct {
 		UnderProxy   bool   `yaml:"under_proxy" env:"HTTP_UNDER_PROXY" env-default:"false"`
 		StartSwagger bool   `yaml:"start_swagger" env:"HTTP_START_SWAGGER" env-default:"false"`
 	} `yaml:"http"`
+	GRPC struct {
+		Port int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
+	} `yaml:"grpc"`
 	Storage struct {
 		S3Endpoint  string `yaml:"s3_endpoint" env:"STORAGE_S3_ENDPOINT" env-default:""`
 		S3AccessKey string `yaml:"s3_access_key" env:"STORAGE_S3_ACCESS_KEY" env-default:""`

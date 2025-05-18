@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package products;
+
+option go_package = "m11ano.mipt_webdev_course.products.v1;productsv1";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+// Products service
+service Products {
+  // Get items by IDs
+  rpc ItemsByIDs (ItemsByIDsRequest) returns (ItemsByIDsResponse);
+}
+
+
+message ProductListItem {
+  int64 id = 1;
+  bool is_published = 2;
+  string name = 3;
+  string price = 4;
+  int32 stock_available = 5;
+  google.protobuf.StringValue image_preview_file_id = 6;
+  string image_preview_file_url = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp deleted_at = 10;
+}
+
+message ItemsByIDsRequest {
+  repeated int64 ids = 1;
+}
+
+message ItemsByIDsResponse {
+  repeated ProductListItem items = 1;
+}

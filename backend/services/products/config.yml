@@ -36,5 +36,8 @@ http:
     under_proxy: false
     start_swagger: true
 
+grpc:
+    port: 8090
+
 secrets:
     jwt: "T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8"
