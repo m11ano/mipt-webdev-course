@@ -5,20 +5,33 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/imperatorofdwelling/Website-backend/pkg/logger/slogpretty"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/config"
 )
 
 func NewLogger(config config.Config) *slog.Logger {
-	var handler slog.Handler
+	var logger *slog.Logger
+
 	switch {
 	case !config.App.UseLogger:
-		handler = slog.NewTextHandler(io.Discard, nil)
+		logger = slog.New(slog.NewTextHandler(io.Discard, nil))
 	case config.App.IsProd:
-		handler = slog.NewJSONHandler(os.Stdout, nil)
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	default:
-		handler = slog.NewTextHandler(os.Stdout, nil)
+		logger = setupPrettySlog()
 	}
 
-	logger := slog.New(handler)
 	return logger
+}
+
+func setupPrettySlog() *slog.Logger {
+	opts := slogpretty.PrettyHandlerOptions{
+		SlogOpts: &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		},
+	}
+
+	handler := opts.NewPrettyHandler(os.Stdout)
+
+	return slog.New(handler)
 }
