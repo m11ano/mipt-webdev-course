@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 // Products service
 service Products {
   // Get items by IDs
-  rpc ItemsByIDs (ItemsByIDsRequest) returns (ItemsByIDsResponse);
+  rpc ProductsByIDs (ProductsByIDsRequest) returns (ProductsByIDsResponse);
 }
 
 
@@ -27,10 +27,10 @@ message ProductListItem {
   google.protobuf.Timestamp deleted_at = 10;
 }
 
-message ItemsByIDsRequest {
+message ProductsByIDsRequest {
   repeated int64 ids = 1;
 }
 
-message ItemsByIDsResponse {
+message ProductsByIDsResponse {
   repeated ProductListItem items = 1;
 }

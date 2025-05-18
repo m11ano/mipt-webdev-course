@@ -139,27 +139,27 @@ func (x *ProductListItem) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type ItemsByIDsRequest struct {
+type ProductsByIDsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ItemsByIDsRequest) Reset() {
-	*x = ItemsByIDsRequest{}
+func (x *ProductsByIDsRequest) Reset() {
+	*x = ProductsByIDsRequest{}
 	mi := &file_products_products_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ItemsByIDsRequest) String() string {
+func (x *ProductsByIDsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ItemsByIDsRequest) ProtoMessage() {}
+func (*ProductsByIDsRequest) ProtoMessage() {}
 
-func (x *ItemsByIDsRequest) ProtoReflect() protoreflect.Message {
+func (x *ProductsByIDsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -171,39 +171,39 @@ func (x *ItemsByIDsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ItemsByIDsRequest.ProtoReflect.Descriptor instead.
-func (*ItemsByIDsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProductsByIDsRequest.ProtoReflect.Descriptor instead.
+func (*ProductsByIDsRequest) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ItemsByIDsRequest) GetIds() []int64 {
+func (x *ProductsByIDsRequest) GetIds() []int64 {
 	if x != nil {
 		return x.Ids
 	}
 	return nil
 }
 
-type ItemsByIDsResponse struct {
+type ProductsByIDsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*ProductListItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ItemsByIDsResponse) Reset() {
-	*x = ItemsByIDsResponse{}
+func (x *ProductsByIDsResponse) Reset() {
+	*x = ProductsByIDsResponse{}
 	mi := &file_products_products_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ItemsByIDsResponse) String() string {
+func (x *ProductsByIDsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ItemsByIDsResponse) ProtoMessage() {}
+func (*ProductsByIDsResponse) ProtoMessage() {}
 
-func (x *ItemsByIDsResponse) ProtoReflect() protoreflect.Message {
+func (x *ProductsByIDsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -215,12 +215,12 @@ func (x *ItemsByIDsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ItemsByIDsResponse.ProtoReflect.Descriptor instead.
-func (*ItemsByIDsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProductsByIDsResponse.ProtoReflect.Descriptor instead.
+func (*ProductsByIDsResponse) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ItemsByIDsResponse) GetItems() []*ProductListItem {
+func (x *ProductsByIDsResponse) GetItems() []*ProductListItem {
 	if x != nil {
 		return x.Items
 	}
@@ -246,14 +246,13 @@ const file_products_products_proto_rawDesc = "" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"%\n" +
-	"\x11ItemsByIDsRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\"E\n" +
-	"\x12ItemsByIDsResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items2S\n" +
-	"\bProducts\x12G\n" +
-	"\n" +
-	"ItemsByIDs\x12\x1b.products.ItemsByIDsRequest\x1a\x1c.products.ItemsByIDsResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"(\n" +
+	"\x14ProductsByIDsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\x03R\x03ids\"H\n" +
+	"\x15ProductsByIDsResponse\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items2\\\n" +
+	"\bProducts\x12P\n" +
+	"\rProductsByIDs\x12\x1e.products.ProductsByIDsRequest\x1a\x1f.products.ProductsByIDsResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
 
 var (
 	file_products_products_proto_rawDescOnce sync.Once
@@ -270,8 +269,8 @@ func file_products_products_proto_rawDescGZIP() []byte {
 var file_products_products_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_products_products_proto_goTypes = []any{
 	(*ProductListItem)(nil),        // 0: products.ProductListItem
-	(*ItemsByIDsRequest)(nil),      // 1: products.ItemsByIDsRequest
-	(*ItemsByIDsResponse)(nil),     // 2: products.ItemsByIDsResponse
+	(*ProductsByIDsRequest)(nil),   // 1: products.ProductsByIDsRequest
+	(*ProductsByIDsResponse)(nil),  // 2: products.ProductsByIDsResponse
 	(*wrapperspb.StringValue)(nil), // 3: google.protobuf.StringValue
 	(*timestamppb.Timestamp)(nil),  // 4: google.protobuf.Timestamp
 }
@@ -280,9 +279,9 @@ var file_products_products_proto_depIdxs = []int32{
 	4, // 1: products.ProductListItem.created_at:type_name -> google.protobuf.Timestamp
 	4, // 2: products.ProductListItem.updated_at:type_name -> google.protobuf.Timestamp
 	4, // 3: products.ProductListItem.deleted_at:type_name -> google.protobuf.Timestamp
-	0, // 4: products.ItemsByIDsResponse.items:type_name -> products.ProductListItem
-	1, // 5: products.Products.ItemsByIDs:input_type -> products.ItemsByIDsRequest
-	2, // 6: products.Products.ItemsByIDs:output_type -> products.ItemsByIDsResponse
+	0, // 4: products.ProductsByIDsResponse.items:type_name -> products.ProductListItem
+	1, // 5: products.Products.ProductsByIDs:input_type -> products.ProductsByIDsRequest
+	2, // 6: products.Products.ProductsByIDs:output_type -> products.ProductsByIDsResponse
 	6, // [6:7] is the sub-list for method output_type
 	5, // [5:6] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

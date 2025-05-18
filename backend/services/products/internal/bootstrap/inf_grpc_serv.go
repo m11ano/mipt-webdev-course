@@ -33,7 +33,7 @@ func NewGRPCServer(cfg config.Config, logger *slog.Logger) *grpc.Server {
 	interceptors := []grpc.UnaryServerInterceptor{recovery.UnaryServerInterceptor(recoveryOpts...)}
 
 	if !cfg.App.IsProd {
-		interceptors = append(interceptors, logging.UnaryServerInterceptor(InterceptorLogger(logger), loggingOpts...))
+		interceptors = append(interceptors, logging.UnaryServerInterceptor(gRPCServerInterceptorLogger(logger), loggingOpts...))
 	}
 
 	gRPCServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptors...))
@@ -41,7 +41,7 @@ func NewGRPCServer(cfg config.Config, logger *slog.Logger) *grpc.Server {
 	return gRPCServer
 }
 
-func InterceptorLogger(logger *slog.Logger) logging.Logger {
+func gRPCServerInterceptorLogger(logger *slog.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
 		logger.Log(ctx, slog.Level(lvl), msg, fields...)
 	})

@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Products_ItemsByIDs_FullMethodName = "/products.Products/ItemsByIDs"
+	Products_ProductsByIDs_FullMethodName = "/products.Products/ProductsByIDs"
 )
 
 // ProductsClient is the client API for Products service.
@@ -29,7 +29,7 @@ const (
 // Products service
 type ProductsClient interface {
 	// Get items by IDs
-	ItemsByIDs(ctx context.Context, in *ItemsByIDsRequest, opts ...grpc.CallOption) (*ItemsByIDsResponse, error)
+	ProductsByIDs(ctx context.Context, in *ProductsByIDsRequest, opts ...grpc.CallOption) (*ProductsByIDsResponse, error)
 }
 
 type productsClient struct {
@@ -40,10 +40,10 @@ func NewProductsClient(cc grpc.ClientConnInterface) ProductsClient {
 	return &productsClient{cc}
 }
 
-func (c *productsClient) ItemsByIDs(ctx context.Context, in *ItemsByIDsRequest, opts ...grpc.CallOption) (*ItemsByIDsResponse, error) {
+func (c *productsClient) ProductsByIDs(ctx context.Context, in *ProductsByIDsRequest, opts ...grpc.CallOption) (*ProductsByIDsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ItemsByIDsResponse)
-	err := c.cc.Invoke(ctx, Products_ItemsByIDs_FullMethodName, in, out, cOpts...)
+	out := new(ProductsByIDsResponse)
+	err := c.cc.Invoke(ctx, Products_ProductsByIDs_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *productsClient) ItemsByIDs(ctx context.Context, in *ItemsByIDsRequest, 
 // Products service
 type ProductsServer interface {
 	// Get items by IDs
-	ItemsByIDs(context.Context, *ItemsByIDsRequest) (*ItemsByIDsResponse, error)
+	ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -68,8 +68,8 @@ type ProductsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedProductsServer struct{}
 
-func (UnimplementedProductsServer) ItemsByIDs(context.Context, *ItemsByIDsRequest) (*ItemsByIDsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ItemsByIDs not implemented")
+func (UnimplementedProductsServer) ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProductsByIDs not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -92,20 +92,20 @@ func RegisterProductsServer(s grpc.ServiceRegistrar, srv ProductsServer) {
 	s.RegisterService(&Products_ServiceDesc, srv)
 }
 
-func _Products_ItemsByIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ItemsByIDsRequest)
+func _Products_ProductsByIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductsByIDsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).ItemsByIDs(ctx, in)
+		return srv.(ProductsServer).ProductsByIDs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_ItemsByIDs_FullMethodName,
+		FullMethod: Products_ProductsByIDs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).ItemsByIDs(ctx, req.(*ItemsByIDsRequest))
+		return srv.(ProductsServer).ProductsByIDs(ctx, req.(*ProductsByIDsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -118,8 +118,8 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProductsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ItemsByIDs",
-			Handler:    _Products_ItemsByIDs_Handler,
+			MethodName: "ProductsByIDs",
+			Handler:    _Products_ProductsByIDs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
