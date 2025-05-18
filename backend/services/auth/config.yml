@@ -1,0 +1,26 @@
+app:
+    is_prod: false
+    start_timeout: 60
+    stop_timeout: 10
+    use_fx_logger: true
+    use_logger: true
+
+db:
+    uri: "postgres://postgres:12345678@localhost:5433/webdev-auth"
+    max_attempts: 10
+    attempt_sleep_seconds: 3
+    migrations_path: "migrations"
+
+http:
+    prefix: "api"
+    service_name: "auth"
+    port: 8081
+    stop_timeout: 5
+    under_proxy: false
+    start_swagger: true
+
+auth:
+    token_ttl_hours: 24
+
+secrets:
+    jwt: "T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8"

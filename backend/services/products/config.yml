@@ -1,0 +1,40 @@
+app:
+    is_prod: false
+    start_timeout: 60
+    stop_timeout: 10
+    use_fx_logger: true
+    use_logger: true
+
+cron:
+    tasks:
+        remove_files_in_storage:
+            schedule: "0 */10 * * * *"
+            after_remove_seconds: 60
+
+        delete_not_assigned_files:
+            schedule: "0 0 * * * *"
+            after_create_hours: 24
+
+db:
+    uri: "postgres://postgres:12345678@localhost:5433/webdev-products"
+    max_attempts: 10
+    attempt_sleep_seconds: 3
+    migrations_path: "migrations"
+
+storage:
+    s3_endpoint: "http://127.0.0.1:9000"
+    s3_access_key: "minioadmin"
+    s3_secret_key: "minioadmin"
+    s3_region: "local"
+    s3_url: "http://127.0.0.1:9000"
+
+http:
+    prefix: "api"
+    service_name: "products"
+    port: 8080
+    stop_timeout: 5
+    under_proxy: false
+    start_swagger: true
+
+secrets:
+    jwt: "T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8"
