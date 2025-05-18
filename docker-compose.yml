@@ -25,6 +25,9 @@ services:
             MINIO_ROOT_PASSWORD: minioadmin
         command: server /data --console-address ":9001"
         restart: always
+        ports:
+            - "9000:9000"
+            - "9001:9001"
         volumes:
             - minio-data:/data
         networks:
