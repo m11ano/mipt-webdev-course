@@ -426,14 +426,20 @@ func (uc *OrderInpl) SetOrderComposition(ctx context.Context, input SetOrderComp
 			return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is canceled or finished")
 		}
 
+		skeepProducts := false
+
 		if input.Status != nil {
 			err = order.SetStatus(*input.Status)
 			if err != nil {
 				return err
 			}
+
+			if order.Status == domain.OrderStatusCanceled {
+				skeepProducts = true
+			}
 		}
 
-		if input.Products != nil {
+		if input.Products != nil && !skeepProducts {
 
 			err = uc.orderProductUC.DeleteByOrderID(ctx, input.OrderID)
 			if err != nil {
@@ -521,6 +527,10 @@ func (uc *OrderInpl) SetStatus(ctx context.Context, orderID int64, status domain
 	})
 	if err != nil {
 		return err
+	}
+
+	if order.Status == status {
+		return nil
 	}
 
 	err = order.SetStatus(status)
