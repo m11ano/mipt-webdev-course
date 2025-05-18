@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY services/auth /app/services/auth
 COPY clients /app/clients
+COPY protos /app/protos
 
 WORKDIR /app/services/auth
 

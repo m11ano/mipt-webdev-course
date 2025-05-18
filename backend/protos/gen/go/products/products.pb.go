@@ -28,13 +28,14 @@ type ProductListItem struct {
 	Id                  int64                   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	IsPublished         bool                    `protobuf:"varint,2,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
 	Name                string                  `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Price               string                  `protobuf:"bytes,4,opt,name=price,proto3" json:"price,omitempty"`
-	StockAvailable      int32                   `protobuf:"varint,5,opt,name=stock_available,json=stockAvailable,proto3" json:"stock_available,omitempty"`
-	ImagePreviewFileId  *wrapperspb.StringValue `protobuf:"bytes,6,opt,name=image_preview_file_id,json=imagePreviewFileId,proto3" json:"image_preview_file_id,omitempty"`
-	ImagePreviewFileUrl string                  `protobuf:"bytes,7,opt,name=image_preview_file_url,json=imagePreviewFileUrl,proto3" json:"image_preview_file_url,omitempty"`
-	CreatedAt           *timestamppb.Timestamp  `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt           *timestamppb.Timestamp  `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt           *timestamppb.Timestamp  `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	FullDescription     string                  `protobuf:"bytes,4,opt,name=full_description,json=fullDescription,proto3" json:"full_description,omitempty"`
+	Price               string                  `protobuf:"bytes,5,opt,name=price,proto3" json:"price,omitempty"`
+	StockAvailable      int32                   `protobuf:"varint,6,opt,name=stock_available,json=stockAvailable,proto3" json:"stock_available,omitempty"`
+	ImagePreviewFileId  *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=image_preview_file_id,json=imagePreviewFileId,proto3" json:"image_preview_file_id,omitempty"`
+	ImagePreviewFileUrl string                  `protobuf:"bytes,8,opt,name=image_preview_file_url,json=imagePreviewFileUrl,proto3" json:"image_preview_file_url,omitempty"`
+	CreatedAt           *timestamppb.Timestamp  `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt           *timestamppb.Timestamp  `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt           *timestamppb.Timestamp  `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -86,6 +87,13 @@ func (x *ProductListItem) GetIsPublished() bool {
 func (x *ProductListItem) GetName() string {
 	if x != nil {
 		return x.Name
+	}
+	return ""
+}
+
+func (x *ProductListItem) GetFullDescription() string {
+	if x != nil {
+		return x.FullDescription
 	}
 	return ""
 }
@@ -231,22 +239,23 @@ var File_products_products_proto protoreflect.FileDescriptor
 
 const file_products_products_proto_rawDesc = "" +
 	"\n" +
-	"\x17products/products.proto\x12\bproducts\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xce\x03\n" +
+	"\x17products/products.proto\x12\bproducts\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf9\x03\n" +
 	"\x0fProductListItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\fis_published\x18\x02 \x01(\bR\visPublished\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
-	"\x05price\x18\x04 \x01(\tR\x05price\x12'\n" +
-	"\x0fstock_available\x18\x05 \x01(\x05R\x0estockAvailable\x12O\n" +
-	"\x15image_preview_file_id\x18\x06 \x01(\v2\x1c.google.protobuf.StringValueR\x12imagePreviewFileId\x123\n" +
-	"\x16image_preview_file_url\x18\a \x01(\tR\x13imagePreviewFileUrl\x129\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12)\n" +
+	"\x10full_description\x18\x04 \x01(\tR\x0ffullDescription\x12\x14\n" +
+	"\x05price\x18\x05 \x01(\tR\x05price\x12'\n" +
+	"\x0fstock_available\x18\x06 \x01(\x05R\x0estockAvailable\x12O\n" +
+	"\x15image_preview_file_id\x18\a \x01(\v2\x1c.google.protobuf.StringValueR\x12imagePreviewFileId\x123\n" +
+	"\x16image_preview_file_url\x18\b \x01(\tR\x13imagePreviewFileUrl\x129\n" +
 	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"(\n" +
+	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"(\n" +
 	"\x14ProductsByIDsRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\x03R\x03ids\"H\n" +
 	"\x15ProductsByIDsResponse\x12/\n" +

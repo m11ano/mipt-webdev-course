@@ -18,13 +18,14 @@ message ProductListItem {
   int64 id = 1;
   bool is_published = 2;
   string name = 3;
-  string price = 4;
-  int32 stock_available = 5;
-  google.protobuf.StringValue image_preview_file_id = 6;
-  string image_preview_file_url = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
-  google.protobuf.Timestamp deleted_at = 10;
+  string full_description = 4;
+  string price = 5;
+  int32 stock_available = 6;
+  google.protobuf.StringValue image_preview_file_id = 7;
+  string image_preview_file_url = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp deleted_at = 11;
 }
 
 message ProductsByIDsRequest {

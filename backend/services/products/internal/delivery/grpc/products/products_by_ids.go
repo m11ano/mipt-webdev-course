@@ -36,14 +36,15 @@ func (s *serverAPI) ProductsByIDs(ctx context.Context, in *productsv1.ProductsBy
 
 	for i, item := range items {
 		out.Items[i] = &productsv1.ProductListItem{
-			Id:             item.Product.ID,
-			Name:           item.Product.Name,
-			Price:          item.Product.Price.String(),
-			IsPublished:    item.Product.IsPublished,
-			StockAvailable: item.Product.StockAvailable,
-			CreatedAt:      timestamppb.New(item.Product.CreatedAt),
-			UpdatedAt:      toProtoTimestamp(item.Product.UpdatedAt),
-			DeletedAt:      toProtoTimestamp(item.Product.DeletedAt),
+			Id:              item.Product.ID,
+			Name:            item.Product.Name,
+			FullDescription: item.Product.FullDescription,
+			Price:           item.Product.Price.String(),
+			IsPublished:     item.Product.IsPublished,
+			StockAvailable:  item.Product.StockAvailable,
+			CreatedAt:       timestamppb.New(item.Product.CreatedAt),
+			UpdatedAt:       toProtoTimestamp(item.Product.UpdatedAt),
+			DeletedAt:       toProtoTimestamp(item.Product.DeletedAt),
 		}
 
 		if item.ProductPreviewFile != nil {
