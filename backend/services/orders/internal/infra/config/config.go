@@ -29,7 +29,14 @@ type Config struct {
 		StartSwagger bool   `yaml:"start_swagger" env:"HTTP_START_SWAGGER" env-default:"false"`
 	} `yaml:"http"`
 	GRPC struct {
-		Port int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
+		Port    int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
+		Clients struct {
+			Products struct {
+				Endpoint  string `yaml:"endpoint" env:"GRPC_CLIENTS_PRODUCTS_ENDPOINT" env-default:"127.0.0.1:8090"`
+				Retries   int    `yaml:"retries" env:"GRPC_CLIENTS_PRODUCTS_RETRIES" env-default:"3"`
+				TimeoutMS int    `yaml:"timeout_ms" env:"GRPC_CLIENTS_PRODUCTS_TIMEOUT_MS" env-default:"100"`
+			} `yaml:"products"`
+		} `yaml:"clients"`
 	} `yaml:"grpc"`
 	Secrets struct {
 		JWT string `yaml:"jwt" env:"SECRETS_JWT" env-default:""`

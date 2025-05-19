@@ -7,6 +7,7 @@ import (
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/m11ano/e"
+	productsgcl "github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/domain"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
@@ -79,18 +80,20 @@ type OrderRepository interface {
 }
 
 type OrderInpl struct {
-	logger    *slog.Logger
-	config    config.Config
-	repo      OrderRepository
-	txManager *manager.Manager
+	logger      *slog.Logger
+	config      config.Config
+	repo        OrderRepository
+	txManager   *manager.Manager
+	productsGCl *productsgcl.ClientConn
 }
 
-func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository) *OrderInpl {
+func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository, productsGCl *productsgcl.ClientConn) *OrderInpl {
 	uc := &OrderInpl{
-		logger:    logger,
-		config:    config,
-		txManager: txManager,
-		repo:      repo,
+		logger:      logger,
+		config:      config,
+		txManager:   txManager,
+		repo:        repo,
+		productsGCl: productsGCl,
 	}
 	return uc
 }
@@ -156,6 +159,13 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 
 	// Сразу предварительно до создания воркфлоу проверим наличие, в случае если товара нет - не будем создавать заведомо провальный воркфлоу
 	fmt.Println(productIDs)
+
+	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	uc.logger.Info("products", slog.Any("products", products))
 
 	order := domain.NewOrder(0)
 	order.ClientName = input.Details.ClientName

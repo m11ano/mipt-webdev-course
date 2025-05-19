@@ -21,6 +21,11 @@ http:
 
 grpc:
     port: 8091
+    clients:
+        products:
+            endpoint: "127.0.0.1:8090"
+            retries: 3
+            timeout_ms: 100
 
 secrets:
     jwt: "T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8"

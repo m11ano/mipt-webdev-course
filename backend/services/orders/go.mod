@@ -2,6 +2,10 @@ module github.com/m11ano/mipt-webdev-course/backend/services/orders
 
 go 1.23.3
 
+require github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc v0.0.0
+
+replace github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc => ../../clients/clgrpc
+
 require github.com/m11ano/mipt-webdev-course/backend/clients/auth v0.0.0
 
 replace github.com/m11ano/mipt-webdev-course/backend/clients/auth => ../../clients/auth
@@ -57,6 +61,8 @@ require (
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/m11ano/avito-pvz v0.0.0-20250414202626-53e162156757 // indirect
+	github.com/m11ano/mipt-webdev-course/backend/protos v0.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -77,7 +83,7 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505200425-f936aa4a68b2 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

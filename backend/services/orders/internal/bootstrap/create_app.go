@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	productsgcl "github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/db/migrations"
 	"go.uber.org/fx"
@@ -22,13 +23,14 @@ var App = fx.Options(
 	fx.Provide(NewPgxv5),
 	fx.Provide(ProvideFiberApp),
 	fx.Provide(ProvidePGXPoolWithTxMgr),
+	fx.Provide(ProvideGRPCClientsConns),
 	// Бизнес логика
 	OrderModule,
 	// Delivery
 	DeliveryHTTP,
 	DeliveryGRPC,
 	// Start && Stop invoke
-	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, grpcServer *grpc.Server) {
+	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, grpcServer *grpc.Server, productsGCl *productsgcl.ClientConn) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				err := Pgxv5TestConnection(ctx, dbpool, logger, config.DB.MaxAttempt, config.DB.AttemptSleepSeconds)
@@ -41,6 +43,12 @@ var App = fx.Options(
 				if err != nil {
 					return err
 				}
+
+				err = ConnectToGRPCServer(ctx, productsGCl.Conn)
+				if err != nil {
+					return err
+				}
+				logger.Info("Connected to products grpc server")
 
 				if config.GRPC.Port > 0 {
 					go StartGRPCServer(grpcServer, config, logger, shutdowner)
