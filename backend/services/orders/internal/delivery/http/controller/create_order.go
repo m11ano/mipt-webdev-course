@@ -72,11 +72,11 @@ func (ctrl *Controller) CreateOrderHandler(c *fiber.Ctx) error {
 			ClientPhone:     in.Details.ClientPhone,
 			DeliveryAddress: in.Details.DeliveryAddress,
 		},
-		Products: make([]usecase.OrderCreateInProduct, len(in.Products)),
+		Products: make([]usecase.OrderProductIn, len(in.Products)),
 	}
 
 	for i, item := range in.Products {
-		createIn.Products[i] = usecase.OrderCreateInProduct{
+		createIn.Products[i] = usecase.OrderProductIn{
 			ID:       item.ID,
 			Quantity: item.Quantity,
 		}

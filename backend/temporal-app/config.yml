@@ -1,0 +1,16 @@
+app:
+    is_prod: false
+    start_timeout: 60
+    stop_timeout: 10
+    use_fx_logger: true
+    use_logger: true
+
+temporal:
+    endpoint: "127.0.0.1:7233"
+
+grpc:
+    clients:
+        products:
+            endpoint: "127.0.0.1:8090"
+            retries: 3
+            timeout_ms: 100

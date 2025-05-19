@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	orderTable = "order"
+	orderTable = "order_item"
 )
 
 type DBOrder struct {

@@ -7,12 +7,16 @@ import (
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/m11ano/e"
+	productscl "github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc/pkg/products"
 	productsgcl "github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/domain"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
 	"github.com/samber/lo"
 )
+
+var ErrOrderInvalidProducts = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products")
+var ErrOrderInvalidProductsQuantity = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products quantity")
 
 type OrderPartUpdateData struct {
 }
@@ -35,7 +39,7 @@ type OrderListOptions struct {
 
 type OrderCreateIn struct {
 	Details  OrderCreateInDetails
-	Products []OrderCreateInProduct
+	Products []OrderProductIn
 }
 
 type OrderCreateInDetails struct {
@@ -46,7 +50,7 @@ type OrderCreateInDetails struct {
 	DeliveryAddress string
 }
 
-type OrderCreateInProduct struct {
+type OrderProductIn struct {
 	ID       int64
 	Quantity int32
 }
@@ -154,18 +158,23 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	productIDs = lo.Uniq(productIDs)
 
 	if len(productIDs) == 0 || len(productIDs) != len(input.Products) {
-		return nil, e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products")
+		return nil, ErrOrderInvalidProducts
 	}
 
-	// Сразу предварительно до создания воркфлоу проверим наличие, в случае если товара нет - не будем создавать заведомо провальный воркфлоу
-	fmt.Println(productIDs)
-
+	// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
 	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	uc.logger.Info("products", slog.Any("products", products))
+	if len(products) != len(productIDs) {
+		return nil, ErrOrderInvalidProducts
+	}
+
+	err = uc.checkStockAvailable(products, input.Products)
+	if err != nil {
+		return nil, err
+	}
 
 	order := domain.NewOrder(0)
 	order.ClientName = input.Details.ClientName
@@ -174,5 +183,38 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	order.ClientPhone = input.Details.ClientPhone
 	order.DeliveryAddress = input.Details.DeliveryAddress
 
+	err = uc.repo.Create(ctx, order)
+	if err != nil {
+		return nil, err
+	}
+
 	return order, nil
+}
+
+func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem, orderProducts []OrderProductIn) error {
+	details := []string{}
+
+	for _, orderProduct := range orderProducts {
+		if orderProduct.Quantity < 1 {
+			return e.NewErrorFrom(e.ErrBadRequest).SetMessage(fmt.Sprintf("invalid quantity in #%d product", orderProduct.ID))
+		}
+
+		product, isFound := lo.Find(products, func(item *productscl.ProductListItem) bool {
+			return item.ID == orderProduct.ID
+		})
+
+		if !isFound {
+			return ErrOrderInvalidProducts
+		}
+
+		if product.StockAvailable < orderProduct.Quantity {
+			details = append(details, fmt.Sprintf(`product #%d "%s" is out of stock, max available: %d`, product.ID, product.Name, product.StockAvailable))
+		}
+	}
+
+	if len(details) > 0 {
+		return e.NewErrorFrom(ErrOrderInvalidProductsQuantity).AddDetails(details)
+	}
+
+	return nil
 }

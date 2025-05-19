@@ -11,13 +11,13 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func (c *ClientImpl) GetProductsByIds(ctx context.Context, ids []int64) ([]ProductListItem, error) {
+func (c *ClientImpl) GetProductsByIds(ctx context.Context, ids []int64) ([]*ProductListItem, error) {
 	items, err := c.api.ProductsByIDs(ctx, &productsv1.ProductsByIDsRequest{Ids: ids})
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]ProductListItem, len(items.GetItems()))
+	result := make([]*ProductListItem, len(items.GetItems()))
 	for i, item := range items.GetItems() {
 		price, err := decimal.NewFromString(item.GetPrice())
 		if err != nil {
@@ -30,7 +30,7 @@ func (c *ClientImpl) GetProductsByIds(ctx context.Context, ids []int64) ([]Produ
 			return nil, e.ErrInternal.Wrap(err)
 		}
 
-		result[i] = ProductListItem{
+		result[i] = &ProductListItem{
 			ID:                  item.GetId(),
 			IsPublished:         item.GetIsPublished(),
 			Name:                item.GetName(),
