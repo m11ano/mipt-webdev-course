@@ -11,6 +11,7 @@ import "google/protobuf/timestamp.proto";
 service Products {
   // Get items by IDs
   rpc ProductsByIDs (ProductsByIDsRequest) returns (ProductsByIDsResponse);
+  rpc OrderBlockedProductsByOrderID (OrderBlockedProductsByOrderIDRequest) returns (OrderBlockedProductsByOrderIDResponse);
 }
 
 
@@ -28,10 +29,23 @@ message ProductListItem {
   google.protobuf.Timestamp deleted_at = 11;
 }
 
+message OrderBlockedProduct {
+  int64 product_id = 1;
+  int32 quantity = 2;
+}
+
 message ProductsByIDsRequest {
   repeated int64 ids = 1;
 }
 
 message ProductsByIDsResponse {
   repeated ProductListItem items = 1;
+}
+
+message OrderBlockedProductsByOrderIDRequest {
+  int64 order_id = 1;
+}
+
+message OrderBlockedProductsByOrderIDResponse {
+  repeated OrderBlockedProduct items = 1;
 }

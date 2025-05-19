@@ -22,3 +22,8 @@ type ProductListItem struct {
 	UpdatedAt *time.Time
 	DeletedAt *time.Time
 }
+
+type OrderBlockedProduct struct {
+	ProductID int64
+	Quantity  int32
+}

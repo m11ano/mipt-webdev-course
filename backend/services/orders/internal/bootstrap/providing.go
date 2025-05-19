@@ -12,6 +12,8 @@ import (
 	productsgcl "github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/db/txmngr"
+	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/temporal"
+	productstc "github.com/m11ano/mipt-webdev-course/backend/temporal-app/pkg/workers/products/client"
 	"go.uber.org/fx/fxevent"
 )
 
@@ -52,4 +54,10 @@ func ProvideGRPCClientsConns(cfg config.Config, logger *slog.Logger) *productsgc
 
 	return products
 
+}
+
+func ProvideTemporalClients(tClient temporal.TemporalClient) productstc.Client {
+	productsClient := productstc.NewClientImpl(tClient)
+
+	return productsClient
 }

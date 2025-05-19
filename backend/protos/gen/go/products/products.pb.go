@@ -147,6 +147,58 @@ func (x *ProductListItem) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type OrderBlockedProduct struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderBlockedProduct) Reset() {
+	*x = OrderBlockedProduct{}
+	mi := &file_products_products_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderBlockedProduct) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderBlockedProduct) ProtoMessage() {}
+
+func (x *OrderBlockedProduct) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderBlockedProduct.ProtoReflect.Descriptor instead.
+func (*OrderBlockedProduct) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *OrderBlockedProduct) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *OrderBlockedProduct) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
 type ProductsByIDsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
@@ -156,7 +208,7 @@ type ProductsByIDsRequest struct {
 
 func (x *ProductsByIDsRequest) Reset() {
 	*x = ProductsByIDsRequest{}
-	mi := &file_products_products_proto_msgTypes[1]
+	mi := &file_products_products_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +220,7 @@ func (x *ProductsByIDsRequest) String() string {
 func (*ProductsByIDsRequest) ProtoMessage() {}
 
 func (x *ProductsByIDsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_products_products_proto_msgTypes[1]
+	mi := &file_products_products_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,7 +233,7 @@ func (x *ProductsByIDsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProductsByIDsRequest.ProtoReflect.Descriptor instead.
 func (*ProductsByIDsRequest) Descriptor() ([]byte, []int) {
-	return file_products_products_proto_rawDescGZIP(), []int{1}
+	return file_products_products_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ProductsByIDsRequest) GetIds() []int64 {
@@ -200,7 +252,7 @@ type ProductsByIDsResponse struct {
 
 func (x *ProductsByIDsResponse) Reset() {
 	*x = ProductsByIDsResponse{}
-	mi := &file_products_products_proto_msgTypes[2]
+	mi := &file_products_products_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -212,7 +264,7 @@ func (x *ProductsByIDsResponse) String() string {
 func (*ProductsByIDsResponse) ProtoMessage() {}
 
 func (x *ProductsByIDsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_products_products_proto_msgTypes[2]
+	mi := &file_products_products_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -225,10 +277,98 @@ func (x *ProductsByIDsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProductsByIDsResponse.ProtoReflect.Descriptor instead.
 func (*ProductsByIDsResponse) Descriptor() ([]byte, []int) {
-	return file_products_products_proto_rawDescGZIP(), []int{2}
+	return file_products_products_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ProductsByIDsResponse) GetItems() []*ProductListItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type OrderBlockedProductsByOrderIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderBlockedProductsByOrderIDRequest) Reset() {
+	*x = OrderBlockedProductsByOrderIDRequest{}
+	mi := &file_products_products_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderBlockedProductsByOrderIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderBlockedProductsByOrderIDRequest) ProtoMessage() {}
+
+func (x *OrderBlockedProductsByOrderIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderBlockedProductsByOrderIDRequest.ProtoReflect.Descriptor instead.
+func (*OrderBlockedProductsByOrderIDRequest) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *OrderBlockedProductsByOrderIDRequest) GetOrderId() int64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+type OrderBlockedProductsByOrderIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*OrderBlockedProduct `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderBlockedProductsByOrderIDResponse) Reset() {
+	*x = OrderBlockedProductsByOrderIDResponse{}
+	mi := &file_products_products_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderBlockedProductsByOrderIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderBlockedProductsByOrderIDResponse) ProtoMessage() {}
+
+func (x *OrderBlockedProductsByOrderIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderBlockedProductsByOrderIDResponse.ProtoReflect.Descriptor instead.
+func (*OrderBlockedProductsByOrderIDResponse) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *OrderBlockedProductsByOrderIDResponse) GetItems() []*OrderBlockedProduct {
 	if x != nil {
 		return x.Items
 	}
@@ -255,13 +395,22 @@ const file_products_products_proto_rawDesc = "" +
 	"updated_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"(\n" +
+	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"P\n" +
+	"\x13OrderBlockedProduct\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x02 \x01(\x05R\bquantity\"(\n" +
 	"\x14ProductsByIDsRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\x03R\x03ids\"H\n" +
 	"\x15ProductsByIDsResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items2\\\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items\"A\n" +
+	"$OrderBlockedProductsByOrderIDRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\x03R\aorderId\"\\\n" +
+	"%OrderBlockedProductsByOrderIDResponse\x123\n" +
+	"\x05items\x18\x01 \x03(\v2\x1d.products.OrderBlockedProductR\x05items2\xdf\x01\n" +
 	"\bProducts\x12P\n" +
-	"\rProductsByIDs\x12\x1e.products.ProductsByIDsRequest\x1a\x1f.products.ProductsByIDsResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
+	"\rProductsByIDs\x12\x1e.products.ProductsByIDsRequest\x1a\x1f.products.ProductsByIDsResponse\x12\x80\x01\n" +
+	"\x1dOrderBlockedProductsByOrderID\x12..products.OrderBlockedProductsByOrderIDRequest\x1a/.products.OrderBlockedProductsByOrderIDResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
 
 var (
 	file_products_products_proto_rawDescOnce sync.Once
@@ -275,27 +424,33 @@ func file_products_products_proto_rawDescGZIP() []byte {
 	return file_products_products_proto_rawDescData
 }
 
-var file_products_products_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_products_products_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_products_products_proto_goTypes = []any{
-	(*ProductListItem)(nil),        // 0: products.ProductListItem
-	(*ProductsByIDsRequest)(nil),   // 1: products.ProductsByIDsRequest
-	(*ProductsByIDsResponse)(nil),  // 2: products.ProductsByIDsResponse
-	(*wrapperspb.StringValue)(nil), // 3: google.protobuf.StringValue
-	(*timestamppb.Timestamp)(nil),  // 4: google.protobuf.Timestamp
+	(*ProductListItem)(nil),                       // 0: products.ProductListItem
+	(*OrderBlockedProduct)(nil),                   // 1: products.OrderBlockedProduct
+	(*ProductsByIDsRequest)(nil),                  // 2: products.ProductsByIDsRequest
+	(*ProductsByIDsResponse)(nil),                 // 3: products.ProductsByIDsResponse
+	(*OrderBlockedProductsByOrderIDRequest)(nil),  // 4: products.OrderBlockedProductsByOrderIDRequest
+	(*OrderBlockedProductsByOrderIDResponse)(nil), // 5: products.OrderBlockedProductsByOrderIDResponse
+	(*wrapperspb.StringValue)(nil),                // 6: google.protobuf.StringValue
+	(*timestamppb.Timestamp)(nil),                 // 7: google.protobuf.Timestamp
 }
 var file_products_products_proto_depIdxs = []int32{
-	3, // 0: products.ProductListItem.image_preview_file_id:type_name -> google.protobuf.StringValue
-	4, // 1: products.ProductListItem.created_at:type_name -> google.protobuf.Timestamp
-	4, // 2: products.ProductListItem.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 3: products.ProductListItem.deleted_at:type_name -> google.protobuf.Timestamp
+	6, // 0: products.ProductListItem.image_preview_file_id:type_name -> google.protobuf.StringValue
+	7, // 1: products.ProductListItem.created_at:type_name -> google.protobuf.Timestamp
+	7, // 2: products.ProductListItem.updated_at:type_name -> google.protobuf.Timestamp
+	7, // 3: products.ProductListItem.deleted_at:type_name -> google.protobuf.Timestamp
 	0, // 4: products.ProductsByIDsResponse.items:type_name -> products.ProductListItem
-	1, // 5: products.Products.ProductsByIDs:input_type -> products.ProductsByIDsRequest
-	2, // 6: products.Products.ProductsByIDs:output_type -> products.ProductsByIDsResponse
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1, // 5: products.OrderBlockedProductsByOrderIDResponse.items:type_name -> products.OrderBlockedProduct
+	2, // 6: products.Products.ProductsByIDs:input_type -> products.ProductsByIDsRequest
+	4, // 7: products.Products.OrderBlockedProductsByOrderID:input_type -> products.OrderBlockedProductsByOrderIDRequest
+	3, // 8: products.Products.ProductsByIDs:output_type -> products.ProductsByIDsResponse
+	5, // 9: products.Products.OrderBlockedProductsByOrderID:output_type -> products.OrderBlockedProductsByOrderIDResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_products_products_proto_init() }
@@ -309,7 +464,7 @@ func file_products_products_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_products_products_proto_rawDesc), len(file_products_products_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -12,14 +12,16 @@ import (
 
 type serverAPI struct {
 	productsv1.UnimplementedProductsServer
-	cfg       config.Config
-	productUC usecase.Product
+	cfg                 config.Config
+	productUC           usecase.Product
+	productOrderBlockUC usecase.ProductOrderBlock
 }
 
-func Register(gRPCServer *grpc.Server, cfg config.Config, productUC usecase.Product) {
+func Register(gRPCServer *grpc.Server, cfg config.Config, productUC usecase.Product, productOrderBlockUC usecase.ProductOrderBlock) {
 	productsv1.RegisterProductsServer(gRPCServer, &serverAPI{
-		productUC: productUC,
-		cfg:       cfg,
+		cfg:                 cfg,
+		productUC:           productUC,
+		productOrderBlockUC: productOrderBlockUC,
 	})
 }
 

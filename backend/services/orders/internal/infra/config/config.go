@@ -28,6 +28,9 @@ type Config struct {
 		UnderProxy   bool   `yaml:"under_proxy" env:"HTTP_UNDER_PROXY" env-default:"false"`
 		StartSwagger bool   `yaml:"start_swagger" env:"HTTP_START_SWAGGER" env-default:"false"`
 	} `yaml:"http"`
+	Temporal struct {
+		Endpoint string `yaml:"endpoint" env:"TEMPORAL_ENDPOINT" env-default:"127.0.0.1:7233"`
+	} `yaml:"temporal"`
 	GRPC struct {
 		Port    int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
 		Clients struct {

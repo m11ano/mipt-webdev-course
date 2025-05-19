@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/domain"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
+	productstc "github.com/m11ano/mipt-webdev-course/backend/temporal-app/pkg/workers/products/client"
 	"github.com/samber/lo"
 )
 
@@ -89,15 +91,17 @@ type OrderInpl struct {
 	repo        OrderRepository
 	txManager   *manager.Manager
 	productsGCl *productsgcl.ClientConn
+	productsTCl productstc.Client
 }
 
-func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository, productsGCl *productsgcl.ClientConn) *OrderInpl {
+func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository, productsGCl *productsgcl.ClientConn, productsTCl productstc.Client) *OrderInpl {
 	uc := &OrderInpl{
 		logger:      logger,
 		config:      config,
 		txManager:   txManager,
 		repo:        repo,
 		productsGCl: productsGCl,
+		productsTCl: productsTCl,
 	}
 	return uc
 }
@@ -161,20 +165,22 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 		return nil, ErrOrderInvalidProducts
 	}
 
-	// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
-	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
+		products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
+		if err != nil {
+			return nil, err
+		}
 
-	if len(products) != len(productIDs) {
-		return nil, ErrOrderInvalidProducts
-	}
+		if len(products) != len(productIDs) {
+			return nil, ErrOrderInvalidProducts
+		}
 
-	err = uc.checkStockAvailable(products, input.Products)
-	if err != nil {
-		return nil, err
-	}
+		err = uc.checkStockAvailable(products, input.Products)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	order := domain.NewOrder(0)
 	order.ClientName = input.Details.ClientName
@@ -183,8 +189,19 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	order.ClientPhone = input.Details.ClientPhone
 	order.DeliveryAddress = input.Details.DeliveryAddress
 
-	err = uc.repo.Create(ctx, order)
+	err := uc.repo.Create(ctx, order)
 	if err != nil {
+		return nil, err
+	}
+
+	//Запускаем воркфлоу
+	err = uc.productsTCl.SetOrderProductsAndBlock(ctx, productstc.SetOrderProductsAndBlockIn{
+		OrderID: order.ID,
+	})
+	if err != nil {
+		if errors.Is(err, productstc.ErrSetOrderProductsAndBlockCantReserve) {
+			return nil, ErrOrderInvalidProductsQuantity
+		}
 		return nil, err
 	}
 
@@ -208,7 +225,7 @@ func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem,
 		}
 
 		if product.StockAvailable < orderProduct.Quantity {
-			details = append(details, fmt.Sprintf(`product #%d "%s" is out of stock, max available: %d`, product.ID, product.Name, product.StockAvailable))
+			details = append(details, fmt.Sprintf(`Доступный для заказа остаток по товару "%s": %d шт.`, product.Name, product.StockAvailable))
 		}
 	}
 

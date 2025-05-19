@@ -17,6 +17,7 @@ type ProductOrderBlockListOptions struct {
 
 //go:generate mockery --name=ProductOrderBlock --output=../../tests/mocks --case=underscore
 type ProductOrderBlock interface {
+	GetOrderBlockedProducts(ctx context.Context, orderID int64) (items []*domain.ProductOrderBlock, err error)
 	CheckBlockForProduct(ctx context.Context, productID int64) (result bool, err error)
 	CreateBlockForProduct(ctx context.Context, productID int64) (item *domain.ProductOrderBlock, err error)
 	CancelBlockForProduct(ctx context.Context, productID int64) (err error)
@@ -45,6 +46,12 @@ func NewProductOrderBlockInpl(logger *slog.Logger, config config.Config, txManag
 		repo:      repo,
 	}
 	return uc
+}
+
+func (uc *ProductOrderBlockInpl) GetOrderBlockedProducts(ctx context.Context, orderID int64) (items []*domain.ProductOrderBlock, err error) {
+	return uc.repo.FindList(ctx, ProductOrderBlockListOptions{
+		OrderID: &orderID,
+	}, &uctypes.QueryGetListParams{})
 }
 
 func (uc *ProductOrderBlockInpl) CheckBlockForProduct(ctx context.Context, productID int64) (bool, error) {

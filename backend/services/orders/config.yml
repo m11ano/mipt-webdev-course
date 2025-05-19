@@ -19,6 +19,9 @@ http:
     under_proxy: false
     start_swagger: true
 
+temporal:
+    endpoint: "127.0.0.1:7233"
+
 grpc:
     port: 8091
     clients:

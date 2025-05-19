@@ -12,6 +12,7 @@ import (
 	productsgcl "github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/db/migrations"
+	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/temporal"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 )
@@ -24,13 +25,16 @@ var App = fx.Options(
 	fx.Provide(ProvideFiberApp),
 	fx.Provide(ProvidePGXPoolWithTxMgr),
 	fx.Provide(ProvideGRPCClientsConns),
+	fx.Provide(ProdiveTemporalAndConnect),
+	fx.Provide(ProvideTemporalClients),
 	// Бизнес логика
 	OrderModule,
 	// Delivery
 	DeliveryHTTP,
 	DeliveryGRPC,
 	// Start && Stop invoke
-	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, grpcServer *grpc.Server, productsGCl *productsgcl.ClientConn) {
+	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, grpcServer *grpc.Server, productsGCl *productsgcl.ClientConn, tClient temporal.TemporalClient) {
+
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				err := Pgxv5TestConnection(ctx, dbpool, logger, config.DB.MaxAttempt, config.DB.AttemptSleepSeconds)
@@ -81,6 +85,8 @@ var App = fx.Options(
 					logger.Info("stopping gRPC server")
 					grpcServer.GracefulStop()
 				}
+
+				tClient.Close()
 
 				logger.Info("stopping Postgress")
 				dbpool.Close()

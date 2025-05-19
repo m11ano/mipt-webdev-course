@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
-	"github.com/m11ano/avito-pvz/pkg/e"
+	"github.com/m11ano/e"
 	productsv1 "github.com/m11ano/mipt-webdev-course/backend/protos/gen/go/products"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"

@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Products_ProductsByIDs_FullMethodName = "/products.Products/ProductsByIDs"
+	Products_ProductsByIDs_FullMethodName                 = "/products.Products/ProductsByIDs"
+	Products_OrderBlockedProductsByOrderID_FullMethodName = "/products.Products/OrderBlockedProductsByOrderID"
 )
 
 // ProductsClient is the client API for Products service.
@@ -30,6 +31,7 @@ const (
 type ProductsClient interface {
 	// Get items by IDs
 	ProductsByIDs(ctx context.Context, in *ProductsByIDsRequest, opts ...grpc.CallOption) (*ProductsByIDsResponse, error)
+	OrderBlockedProductsByOrderID(ctx context.Context, in *OrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*OrderBlockedProductsByOrderIDResponse, error)
 }
 
 type productsClient struct {
@@ -50,6 +52,16 @@ func (c *productsClient) ProductsByIDs(ctx context.Context, in *ProductsByIDsReq
 	return out, nil
 }
 
+func (c *productsClient) OrderBlockedProductsByOrderID(ctx context.Context, in *OrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*OrderBlockedProductsByOrderIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrderBlockedProductsByOrderIDResponse)
+	err := c.cc.Invoke(ctx, Products_OrderBlockedProductsByOrderID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductsServer is the server API for Products service.
 // All implementations must embed UnimplementedProductsServer
 // for forward compatibility.
@@ -58,6 +70,7 @@ func (c *productsClient) ProductsByIDs(ctx context.Context, in *ProductsByIDsReq
 type ProductsServer interface {
 	// Get items by IDs
 	ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error)
+	OrderBlockedProductsByOrderID(context.Context, *OrderBlockedProductsByOrderIDRequest) (*OrderBlockedProductsByOrderIDResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -70,6 +83,9 @@ type UnimplementedProductsServer struct{}
 
 func (UnimplementedProductsServer) ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProductsByIDs not implemented")
+}
+func (UnimplementedProductsServer) OrderBlockedProductsByOrderID(context.Context, *OrderBlockedProductsByOrderIDRequest) (*OrderBlockedProductsByOrderIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OrderBlockedProductsByOrderID not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -110,6 +126,24 @@ func _Products_ProductsByIDs_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Products_OrderBlockedProductsByOrderID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderBlockedProductsByOrderIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).OrderBlockedProductsByOrderID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_OrderBlockedProductsByOrderID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).OrderBlockedProductsByOrderID(ctx, req.(*OrderBlockedProductsByOrderIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Products_ServiceDesc is the grpc.ServiceDesc for Products service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -120,6 +154,10 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ProductsByIDs",
 			Handler:    _Products_ProductsByIDs_Handler,
+		},
+		{
+			MethodName: "OrderBlockedProductsByOrderID",
+			Handler:    _Products_OrderBlockedProductsByOrderID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
