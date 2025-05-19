@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
+	"github.com/m11ano/e"
 )
 
 type UploadInput struct {

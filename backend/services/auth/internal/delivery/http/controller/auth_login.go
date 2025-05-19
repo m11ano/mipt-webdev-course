@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/delivery/http/validation"
-	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/e"
 )
 
 type AuthLoginHandlerIn struct {
@@ -39,8 +39,8 @@ func (ctrl *Controller) AuthLoginHandler(c *fiber.Ctx) error {
 
 	jwtToken, err := ctrl.authUC.Login(c.Context(), in.Email, in.Password)
 	if err != nil {
-		if e.IsAppError(err) {
-			return err
+		if isAppErr, appErr := e.IsAppError(err); isAppErr {
+			return appErr
 		}
 		return e.ErrInternal
 	}

@@ -18,12 +18,14 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
-	github.com/jackc/pgx/v5 v5.7.4
+	github.com/jackc/pgx/v5 v5.7.5
+	github.com/m11ano/e v1.0.0
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/swag v1.16.4
 	go.uber.org/fx v1.23.0
 	golang.org/x/crypto v0.38.0
+	google.golang.org/grpc v1.72.1
 )
 
 require (

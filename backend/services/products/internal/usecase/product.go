@@ -7,8 +7,8 @@ import (
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/google/uuid"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/domain"
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/usecase/uctypes"
 	"github.com/samber/lo"

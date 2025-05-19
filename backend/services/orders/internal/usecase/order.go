@@ -2,12 +2,15 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/domain"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
+	"github.com/samber/lo"
 )
 
 type OrderPartUpdateData struct {
@@ -30,7 +33,21 @@ type OrderListOptions struct {
 }
 
 type OrderCreateIn struct {
-	Order *domain.Order
+	Details  OrderCreateInDetails
+	Products []OrderCreateInProduct
+}
+
+type OrderCreateInDetails struct {
+	ClientName      string
+	ClientSurname   string
+	ClientEmail     string
+	ClientPhone     string
+	DeliveryAddress string
+}
+
+type OrderCreateInProduct struct {
+	ID       int64
+	Quantity int32
 }
 
 type OrderOneFullOut struct {
@@ -127,5 +144,25 @@ func (uc *OrderInpl) FindOneFullByID(ctx context.Context, id int64, queryParams 
 
 func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.Order, error) {
 
-	return nil, nil
+	productIDs := make([]int64, len(input.Products))
+	for i, item := range input.Products {
+		productIDs[i] = item.ID
+	}
+	productIDs = lo.Uniq(productIDs)
+
+	if len(productIDs) == 0 || len(productIDs) != len(input.Products) {
+		return nil, e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products")
+	}
+
+	// Сразу предварительно до создания воркфлоу проверим наличие, в случае если товара нет - не будем создавать заведомо провальный воркфлоу
+	fmt.Println(productIDs)
+
+	order := domain.NewOrder(0)
+	order.ClientName = input.Details.ClientName
+	order.ClientSurname = input.Details.ClientSurname
+	order.ClientEmail = input.Details.ClientEmail
+	order.ClientPhone = input.Details.ClientPhone
+	order.DeliveryAddress = input.Details.DeliveryAddress
+
+	return order, nil
 }

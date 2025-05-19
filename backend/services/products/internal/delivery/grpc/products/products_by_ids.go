@@ -2,10 +2,9 @@ package productsgrpc
 
 import (
 	"context"
-	"errors"
 
+	"github.com/m11ano/e"
 	productsv1 "github.com/m11ano/mipt-webdev-course/backend/protos/gen/go/products"
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/usecase"
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
@@ -23,10 +22,9 @@ func (s *serverAPI) ProductsByIDs(ctx context.Context, in *productsv1.ProductsBy
 		IDs: lo.ToPtr(in.GetIds()),
 	}, nil)
 	if err != nil {
-		if errors.Is(err, e.ErrInternal) {
-			return nil, status.Error(codes.Internal, err.Error())
+		if isAppErr, appErr := e.IsAppError(err); isAppErr {
+			return nil, status.Error(appErr.GetGRPCCode(), err.Error())
 		}
-
 		return nil, err
 	}
 

@@ -10,8 +10,8 @@ import (
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/domain"
-	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/db"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
@@ -25,13 +25,15 @@ const (
 )
 
 type DBOrder struct {
-	ID                 int64           `db:"id"`
-	IsPublished        bool            `db:"is_published"`
-	Name               string          `db:"name"`
-	FullDescription    string          `db:"full_description"`
-	Price              decimal.Decimal `db:"price"`
-	StockAvailable     int32           `db:"stock_available"`
-	ImagePreviewFileID *uuid.UUID      `db:"image_preview_file_id"`
+	ID              int64              `db:"id"`
+	Status          domain.OrderStatus `db:"status"`
+	OrderSum        decimal.Decimal    `db:"order_sum"`
+	SecretKey       uuid.UUID          `db:"secret_key"`
+	ClientName      string             `db:"client_name"`
+	ClientSurname   string             `db:"client_surname"`
+	ClientEmail     string             `db:"client_email"`
+	ClientPhone     string             `db:"client_phone"`
+	DeliveryAddress string             `db:"delivery_address"`
 
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
@@ -65,16 +67,19 @@ func NewOrder(logger *slog.Logger, db db.PgxPool, txc *trmpgx.CtxGetter) *Order 
 
 func (r *Order) dbToDomain(db *DBOrder) *domain.Order {
 	return &domain.Order{
-		ID:                 db.ID,
-		IsPublished:        db.IsPublished,
-		Name:               db.Name,
-		FullDescription:    db.FullDescription,
-		Price:              db.Price,
-		StockAvailable:     db.StockAvailable,
-		ImagePreviewFileID: db.ImagePreviewFileID,
-		CreatedAt:          db.CreatedAt,
-		UpdatedAt:          db.UpdatedAt,
-		DeletedAt:          db.DeletedAt,
+		ID:              db.ID,
+		Status:          db.Status,
+		OrderSum:        db.OrderSum,
+		SecretKey:       db.SecretKey,
+		ClientName:      db.ClientName,
+		ClientSurname:   db.ClientSurname,
+		ClientEmail:     db.ClientEmail,
+		ClientPhone:     db.ClientPhone,
+		DeliveryAddress: db.DeliveryAddress,
+
+		CreatedAt: db.CreatedAt,
+		UpdatedAt: db.UpdatedAt,
+		DeletedAt: db.DeletedAt,
 	}
 }
 

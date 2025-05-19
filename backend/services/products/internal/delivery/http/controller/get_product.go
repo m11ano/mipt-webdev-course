@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/m11ano/e"
 	_ "github.com/m11ano/mipt-webdev-course/backend/services/products/docs"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/delivery/http/middleware"
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
 )
 
 type GetProductOut struct {

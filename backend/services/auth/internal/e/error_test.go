@@ -22,14 +22,6 @@ func TestNewError(t *testing.T) {
 	assert.Equal(t, expectedErrMsg, err.Error(), "Error() output mismatch")
 }
 
-func TestIsAppError(t *testing.T) {
-	err := NewError(500, "Internal Error", nil)
-	assert.True(t, IsAppError(err), "IsAppError should return true for LogicError")
-
-	stdErr := errors.New("just an error")
-	assert.False(t, IsAppError(stdErr), "IsAppError should return false for standard error")
-}
-
 func TestNewErrorFrom(t *testing.T) {
 	parent := NewError(401, "Unauthorized", []string{"token expired"})
 	child := NewErrorFrom(parent)

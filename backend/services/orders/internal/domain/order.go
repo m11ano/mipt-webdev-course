@@ -1,27 +1,60 @@
 package domain
 
 import (
-	"fmt"
-	"math"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/e"
+	"github.com/m11ano/e"
 	"github.com/shopspring/decimal"
 )
 
-var ErrOrderInvalidPrice = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid price")
-var ErrOrderStockLowerZero = e.NewErrorFrom(e.ErrBadRequest).SetMessage("stock available must be greater than zero")
-var ErrOrderStockMoreMax = e.NewErrorFrom(e.ErrBadRequest).SetMessage(fmt.Sprintf("total stock available must be lower than %d", math.MaxInt32))
+var ErrOrderCantSetStatus = e.NewErrorFrom(e.ErrBadRequest).SetMessage("cant set status")
+
+type OrderStatus int
+
+const (
+	OrderStatusNew      OrderStatus = 0
+	OrderStatusCreated  OrderStatus = 2
+	OrderStatusInWork   OrderStatus = 3
+	OrderStatusFinished OrderStatus = 10
+	OrderStatusCanceled OrderStatus = 99
+)
+
+func (s OrderStatus) String() string {
+	switch s {
+	case OrderStatusNew:
+		return "new"
+	case OrderStatusCreated:
+		return "created"
+	case OrderStatusInWork:
+		return "in_work"
+	case OrderStatusFinished:
+		return "finished"
+	case OrderStatusCanceled:
+		return "canceled"
+	default:
+		return ""
+	}
+}
+
+var OrderStatusMap = map[string]OrderStatus{
+	"new":      OrderStatusNew,
+	"created":  OrderStatusCreated,
+	"in_work":  OrderStatusInWork,
+	"finished": OrderStatusFinished,
+	"canceled": OrderStatusCanceled,
+}
 
 type Order struct {
-	ID                 int64
-	IsPublished        bool
-	Name               string
-	FullDescription    string
-	Price              decimal.Decimal
-	StockAvailable     int32
-	ImagePreviewFileID *uuid.UUID
+	ID              int64
+	Status          OrderStatus
+	OrderSum        decimal.Decimal
+	SecretKey       uuid.UUID
+	ClientName      string
+	ClientSurname   string
+	ClientEmail     string
+	ClientPhone     string
+	DeliveryAddress string
 
 	CreatedAt time.Time
 	UpdatedAt *time.Time
@@ -31,43 +64,37 @@ type Order struct {
 func NewOrder(id int64) *Order {
 	return &Order{
 		ID:        id,
+		Status:    OrderStatusNew,
+		SecretKey: uuid.New(),
 		CreatedAt: time.Now(),
 	}
 }
 
-func (p *Order) SetPrice(price decimal.Decimal) error {
-	if price.LessThan(decimal.Zero) {
-		return ErrOrderInvalidPrice
+func (p *Order) SetStatus(status OrderStatus) error {
+	switch status {
+	case OrderStatusNew:
+		if p.Status != OrderStatusNew {
+			return ErrOrderCantSetStatus
+		}
+	case OrderStatusCreated:
+		if p.Status != OrderStatusNew {
+			return ErrOrderCantSetStatus
+		}
+	case OrderStatusInWork:
+		if p.Status != OrderStatusCreated {
+			return ErrOrderCantSetStatus
+		}
+	case OrderStatusFinished:
+		if p.Status != OrderStatusInWork {
+			return ErrOrderCantSetStatus
+		}
+	case OrderStatusCanceled:
+		if p.Status != OrderStatusFinished {
+			return ErrOrderCantSetStatus
+		}
 	}
 
-	p.Price = price
+	p.Status = status
 
 	return nil
-}
-
-func (p *Order) SetStockAvailable(value int32) error {
-	if value < 0 {
-		return ErrOrderStockLowerZero
-	}
-	p.StockAvailable = value
-
-	return nil
-}
-
-func (p *Order) IncreaseStock(value int64) error {
-	newValue := int64(p.StockAvailable) + value
-	if newValue > math.MaxInt32 {
-		return ErrOrderStockMoreMax
-	}
-
-	return p.SetStockAvailable(int32(newValue))
-}
-
-func (p *Order) DecreaseStock(value int64) error {
-	newValue := int64(p.StockAvailable) - value
-	if newValue < 0 {
-		return ErrOrderStockLowerZero
-	}
-
-	return p.SetStockAvailable(int32(newValue))
 }

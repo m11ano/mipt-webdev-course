@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
+	"github.com/m11ano/e"
 )
 
 var ErrProductOrderBlockQuantityLess1 = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid quantity")

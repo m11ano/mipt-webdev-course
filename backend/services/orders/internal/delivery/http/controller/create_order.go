@@ -1,24 +1,36 @@
 package controller
 
 import (
+	"log/slog"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/delivery/http/validation"
-	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/e"
+	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase"
 )
 
 type CreateOrderIn struct {
-	Name               string      `json:"name" validate:"required,min=1,max=150"`
-	IsPublished        bool        `json:"is_published"`
-	FullDescription    string      `json:"full_description"`
-	Price              float64     `json:"price" validate:"gte=0"`
-	StockAvailable     int32       `json:"stock_available" validate:"gte=0"`
-	ImagePreviewFileID *uuid.UUID  `json:"image_preview_file_id" validate:"required,uuid"`
-	SliderFilesIDs     []uuid.UUID `json:"slider_files_ids" validate:"min=1,dive,uuid"`
+	Details  CreateOrderInDetails   `json:"details" validate:"required"`
+	Products []CreateOrderInProduct `json:"products" validate:"required,min=1"`
+}
+
+type CreateOrderInDetails struct {
+	ClientName      string `json:"client_name" validate:"required,min=1,max=150"`
+	ClientSurname   string `json:"client_surname" validate:"required,min=1,max=150"`
+	ClientEmail     string `json:"client_email" validate:"required,email"`
+	ClientPhone     string `json:"client_phone" validate:"required,min=1,max=20"`
+	DeliveryAddress string `json:"delivery_address" validate:"required,min=1,max=150"`
+}
+
+type CreateOrderInProduct struct {
+	ID       int64 `json:"id" validate:"gte=0"`
+	Quantity int32 `json:"quantity" validate:"gte=1"`
 }
 
 type CreateOrderOut struct {
-	ID int64 `json:"id"`
+	ID        int64     `json:"id"`
+	SecretKey uuid.UUID `json:"secret_key"`
 }
 
 func (ctrl *Controller) CreateOrderHandlerValidate(in *CreateOrderIn) (isOk bool, errMsg []string) {
@@ -50,8 +62,34 @@ func (ctrl *Controller) CreateOrderHandler(c *fiber.Ctx) error {
 		return e.NewErrorFrom(e.ErrBadRequest).AddDetails(errMsg)
 	}
 
+	ctrl.logger.Info("IN", slog.Any("in", in))
+
+	createIn := usecase.OrderCreateIn{
+		Details: usecase.OrderCreateInDetails{
+			ClientName:      in.Details.ClientName,
+			ClientSurname:   in.Details.ClientSurname,
+			ClientEmail:     in.Details.ClientEmail,
+			ClientPhone:     in.Details.ClientPhone,
+			DeliveryAddress: in.Details.DeliveryAddress,
+		},
+		Products: make([]usecase.OrderCreateInProduct, len(in.Products)),
+	}
+
+	for i, item := range in.Products {
+		createIn.Products[i] = usecase.OrderCreateInProduct{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		}
+	}
+
+	order, err := ctrl.orderUC.Create(c.Context(), createIn)
+	if err != nil {
+		return err
+	}
+
 	result := CreateOrderOut{
-		ID: 1,
+		ID:        order.ID,
+		SecretKey: order.SecretKey,
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(result)

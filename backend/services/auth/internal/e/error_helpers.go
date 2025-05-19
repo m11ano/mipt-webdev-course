@@ -2,7 +2,6 @@ package e
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -21,9 +20,7 @@ func ErrConvertPgxToLogic(err error) (bool, error) {
 		return true, NewErrorFrom(ErrStoreNoRows).Wrap(err)
 	}
 	var pgErr *pgconn.PgError
-	fmt.Println("ERROR", err)
 	if errors.As(err, &pgErr) {
-		fmt.Println("ПОЙМАЛ")
 		switch {
 		case pgErr.Code == "40001":
 			return true, NewErrorFrom(ErrTxСoncurrentExec).Wrap(err)

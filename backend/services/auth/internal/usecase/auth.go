@@ -9,8 +9,8 @@ import (
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/clients/auth"
-	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/infra/config"
 )
 

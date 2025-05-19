@@ -1,5 +1,7 @@
 package e
 
+import "google.golang.org/grpc/codes"
+
 type LogicError struct {
 	onlyRead bool
 	code     int
@@ -16,9 +18,13 @@ func (e *LogicError) Error() string {
 	return e.message
 }
 
-func IsAppError(err error) bool {
-	_, ok := err.(*LogicError)
-	return ok
+func IsAppError(err error) (bool, *LogicError) {
+	errC, ok := err.(*LogicError)
+	if ok {
+		return true, errC
+	}
+
+	return false, nil
 }
 
 func NewError(code int, message string, details []string) *LogicError {
@@ -110,4 +116,29 @@ func (e *LogicError) SetData(data any) *LogicError {
 
 	e.data = data
 	return e
+}
+
+func (e *LogicError) GetGRPCCode() codes.Code {
+	switch e.code {
+	case 400:
+		return codes.InvalidArgument
+	case 401:
+		return codes.Unauthenticated
+	case 403:
+		return codes.PermissionDenied
+	case 404:
+		return codes.NotFound
+	case 406:
+		return codes.FailedPrecondition
+	case 409:
+		return codes.Aborted
+	case 422:
+		return codes.InvalidArgument
+	case 500:
+		return codes.Internal
+	case 503:
+		return codes.Unavailable
+	default:
+		return codes.Unknown
+	}
 }

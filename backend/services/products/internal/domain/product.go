@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/e"
+	"github.com/m11ano/e"
 	"github.com/shopspring/decimal"
 )
 

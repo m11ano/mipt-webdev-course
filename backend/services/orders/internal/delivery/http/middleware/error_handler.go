@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/e"
+	"github.com/m11ano/e"
 )
 
 type ErrorJSON struct {
