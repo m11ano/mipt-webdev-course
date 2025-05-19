@@ -15,7 +15,7 @@ $$ LANGUAGE plpgsql;
 -- +goose StatementEnd
 
 -- Таблица заказов
-CREATE TABLE "order" (
+CREATE TABLE order_item (
     id                      BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     status                  INTEGER NOT NULL DEFAULT 0,
     order_sum               NUMERIC(12, 2) NOT NULL CHECK (order_sum >= 0),
@@ -29,13 +29,13 @@ CREATE TABLE "order" (
     updated_at              TIMESTAMPTZ NULL,
     deleted_at              TIMESTAMPTZ NULL
 );
-CREATE TRIGGER trigger_set_updated_at_on_order
-BEFORE UPDATE ON "order"
+CREATE TRIGGER trigger_set_updated_at_on_order_item
+BEFORE UPDATE ON order_item
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- Таблица order_product
 CREATE TABLE order_product (
-    order_id        BIGINT NOT NULL REFERENCES "order"(id) ON DELETE CASCADE,
+    order_id        BIGINT NOT NULL REFERENCES order_item(id) ON DELETE CASCADE,
     product_id      BIGINT NOT NULL,
     price           NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     quantity        INTEGER NOT NULL CHECK (quantity >= 1),
@@ -52,8 +52,8 @@ DROP INDEX IF EXISTS idx_product_order_block_product_id;
 DROP TABLE IF EXISTS order_product;
 
 -- Удаление заказов
-DROP TRIGGER IF EXISTS trigger_set_updated_at_on_order ON "order";
-DROP TABLE IF EXISTS "order";
+DROP TRIGGER IF EXISTS trigger_set_updated_at_on_order_item ON order_item;
+DROP TABLE IF EXISTS order_item;
 
 
 -- Удаление функций
