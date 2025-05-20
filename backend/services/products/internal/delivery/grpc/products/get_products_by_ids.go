@@ -13,7 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func (s *serverAPI) ProductsByIDs(ctx context.Context, in *productsv1.ProductsByIDsRequest) (*productsv1.ProductsByIDsResponse, error) {
+func (s *serverAPI) GetProductsByIDs(ctx context.Context, in *productsv1.GetProductsByIDsRequest) (*productsv1.GetProductsByIDsResponse, error) {
 	if len(in.GetIds()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "empty ids")
 	}
@@ -23,12 +23,12 @@ func (s *serverAPI) ProductsByIDs(ctx context.Context, in *productsv1.ProductsBy
 	}, nil)
 	if err != nil {
 		if isAppErr, appErr := e.IsAppError(err); isAppErr {
-			return nil, status.Error(appErr.GetGRPCCode(), err.Error())
+			return nil, appErr.AsGRPCError()
 		}
 		return nil, err
 	}
 
-	out := &productsv1.ProductsByIDsResponse{
+	out := &productsv1.GetProductsByIDsResponse{
 		Items: make([]*productsv1.ProductListItem, len(items)),
 	}
 

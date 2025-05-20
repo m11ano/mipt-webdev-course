@@ -12,8 +12,11 @@ import (
 )
 
 func (c *ClientImpl) GetProductsByIds(ctx context.Context, ids []int64) ([]*ProductListItem, error) {
-	items, err := c.api.ProductsByIDs(ctx, &productsv1.ProductsByIDsRequest{Ids: ids})
+	items, err := c.api.GetProductsByIDs(ctx, &productsv1.GetProductsByIDsRequest{Ids: ids})
 	if err != nil {
+		if ok, lgErr := e.ErrConvertGRPCToLogic(err); ok {
+			return nil, lgErr
+		}
 		return nil, err
 	}
 

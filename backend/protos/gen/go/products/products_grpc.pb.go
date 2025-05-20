@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Products_ProductsByIDs_FullMethodName                 = "/products.Products/ProductsByIDs"
-	Products_OrderBlockedProductsByOrderID_FullMethodName = "/products.Products/OrderBlockedProductsByOrderID"
+	Products_GetProductsByIDs_FullMethodName                 = "/products.Products/GetProductsByIDs"
+	Products_GetOrderBlockedProductsByOrderID_FullMethodName = "/products.Products/GetOrderBlockedProductsByOrderID"
+	Products_SetOrderBlockedProductsByOrderID_FullMethodName = "/products.Products/SetOrderBlockedProductsByOrderID"
 )
 
 // ProductsClient is the client API for Products service.
@@ -29,9 +30,9 @@ const (
 //
 // Products service
 type ProductsClient interface {
-	// Get items by IDs
-	ProductsByIDs(ctx context.Context, in *ProductsByIDsRequest, opts ...grpc.CallOption) (*ProductsByIDsResponse, error)
-	OrderBlockedProductsByOrderID(ctx context.Context, in *OrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*OrderBlockedProductsByOrderIDResponse, error)
+	GetProductsByIDs(ctx context.Context, in *GetProductsByIDsRequest, opts ...grpc.CallOption) (*GetProductsByIDsResponse, error)
+	GetOrderBlockedProductsByOrderID(ctx context.Context, in *GetOrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*GetOrderBlockedProductsByOrderIDResponse, error)
+	SetOrderBlockedProductsByOrderID(ctx context.Context, in *SetOrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*SetOrderBlockedProductsByOrderIDResponse, error)
 }
 
 type productsClient struct {
@@ -42,20 +43,30 @@ func NewProductsClient(cc grpc.ClientConnInterface) ProductsClient {
 	return &productsClient{cc}
 }
 
-func (c *productsClient) ProductsByIDs(ctx context.Context, in *ProductsByIDsRequest, opts ...grpc.CallOption) (*ProductsByIDsResponse, error) {
+func (c *productsClient) GetProductsByIDs(ctx context.Context, in *GetProductsByIDsRequest, opts ...grpc.CallOption) (*GetProductsByIDsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ProductsByIDsResponse)
-	err := c.cc.Invoke(ctx, Products_ProductsByIDs_FullMethodName, in, out, cOpts...)
+	out := new(GetProductsByIDsResponse)
+	err := c.cc.Invoke(ctx, Products_GetProductsByIDs_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *productsClient) OrderBlockedProductsByOrderID(ctx context.Context, in *OrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*OrderBlockedProductsByOrderIDResponse, error) {
+func (c *productsClient) GetOrderBlockedProductsByOrderID(ctx context.Context, in *GetOrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*GetOrderBlockedProductsByOrderIDResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OrderBlockedProductsByOrderIDResponse)
-	err := c.cc.Invoke(ctx, Products_OrderBlockedProductsByOrderID_FullMethodName, in, out, cOpts...)
+	out := new(GetOrderBlockedProductsByOrderIDResponse)
+	err := c.cc.Invoke(ctx, Products_GetOrderBlockedProductsByOrderID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productsClient) SetOrderBlockedProductsByOrderID(ctx context.Context, in *SetOrderBlockedProductsByOrderIDRequest, opts ...grpc.CallOption) (*SetOrderBlockedProductsByOrderIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetOrderBlockedProductsByOrderIDResponse)
+	err := c.cc.Invoke(ctx, Products_SetOrderBlockedProductsByOrderID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +79,9 @@ func (c *productsClient) OrderBlockedProductsByOrderID(ctx context.Context, in *
 //
 // Products service
 type ProductsServer interface {
-	// Get items by IDs
-	ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error)
-	OrderBlockedProductsByOrderID(context.Context, *OrderBlockedProductsByOrderIDRequest) (*OrderBlockedProductsByOrderIDResponse, error)
+	GetProductsByIDs(context.Context, *GetProductsByIDsRequest) (*GetProductsByIDsResponse, error)
+	GetOrderBlockedProductsByOrderID(context.Context, *GetOrderBlockedProductsByOrderIDRequest) (*GetOrderBlockedProductsByOrderIDResponse, error)
+	SetOrderBlockedProductsByOrderID(context.Context, *SetOrderBlockedProductsByOrderIDRequest) (*SetOrderBlockedProductsByOrderIDResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -81,11 +92,14 @@ type ProductsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedProductsServer struct{}
 
-func (UnimplementedProductsServer) ProductsByIDs(context.Context, *ProductsByIDsRequest) (*ProductsByIDsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ProductsByIDs not implemented")
+func (UnimplementedProductsServer) GetProductsByIDs(context.Context, *GetProductsByIDsRequest) (*GetProductsByIDsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByIDs not implemented")
 }
-func (UnimplementedProductsServer) OrderBlockedProductsByOrderID(context.Context, *OrderBlockedProductsByOrderIDRequest) (*OrderBlockedProductsByOrderIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method OrderBlockedProductsByOrderID not implemented")
+func (UnimplementedProductsServer) GetOrderBlockedProductsByOrderID(context.Context, *GetOrderBlockedProductsByOrderIDRequest) (*GetOrderBlockedProductsByOrderIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrderBlockedProductsByOrderID not implemented")
+}
+func (UnimplementedProductsServer) SetOrderBlockedProductsByOrderID(context.Context, *SetOrderBlockedProductsByOrderIDRequest) (*SetOrderBlockedProductsByOrderIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetOrderBlockedProductsByOrderID not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -108,38 +122,56 @@ func RegisterProductsServer(s grpc.ServiceRegistrar, srv ProductsServer) {
 	s.RegisterService(&Products_ServiceDesc, srv)
 }
 
-func _Products_ProductsByIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProductsByIDsRequest)
+func _Products_GetProductsByIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductsByIDsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).ProductsByIDs(ctx, in)
+		return srv.(ProductsServer).GetProductsByIDs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_ProductsByIDs_FullMethodName,
+		FullMethod: Products_GetProductsByIDs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).ProductsByIDs(ctx, req.(*ProductsByIDsRequest))
+		return srv.(ProductsServer).GetProductsByIDs(ctx, req.(*GetProductsByIDsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Products_OrderBlockedProductsByOrderID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OrderBlockedProductsByOrderIDRequest)
+func _Products_GetOrderBlockedProductsByOrderID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrderBlockedProductsByOrderIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).OrderBlockedProductsByOrderID(ctx, in)
+		return srv.(ProductsServer).GetOrderBlockedProductsByOrderID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_OrderBlockedProductsByOrderID_FullMethodName,
+		FullMethod: Products_GetOrderBlockedProductsByOrderID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).OrderBlockedProductsByOrderID(ctx, req.(*OrderBlockedProductsByOrderIDRequest))
+		return srv.(ProductsServer).GetOrderBlockedProductsByOrderID(ctx, req.(*GetOrderBlockedProductsByOrderIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Products_SetOrderBlockedProductsByOrderID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetOrderBlockedProductsByOrderIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).SetOrderBlockedProductsByOrderID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_SetOrderBlockedProductsByOrderID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).SetOrderBlockedProductsByOrderID(ctx, req.(*SetOrderBlockedProductsByOrderIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -152,12 +184,16 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProductsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ProductsByIDs",
-			Handler:    _Products_ProductsByIDs_Handler,
+			MethodName: "GetProductsByIDs",
+			Handler:    _Products_GetProductsByIDs_Handler,
 		},
 		{
-			MethodName: "OrderBlockedProductsByOrderID",
-			Handler:    _Products_OrderBlockedProductsByOrderID_Handler,
+			MethodName: "GetOrderBlockedProductsByOrderID",
+			Handler:    _Products_GetOrderBlockedProductsByOrderID_Handler,
+		},
+		{
+			MethodName: "SetOrderBlockedProductsByOrderID",
+			Handler:    _Products_SetOrderBlockedProductsByOrderID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

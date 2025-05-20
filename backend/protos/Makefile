@@ -2,7 +2,8 @@ PROTO_DIR=proto
 OUT_DIR=gen/go
 
 PROTO_FILES=\
-  proto/products/*.proto
+  proto/products/*.proto\
+  proto/orders/*.proto
 
 .PHONY: proto clean
 

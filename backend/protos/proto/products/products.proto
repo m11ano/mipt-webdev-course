@@ -9,9 +9,9 @@ import "google/protobuf/timestamp.proto";
 
 // Products service
 service Products {
-  // Get items by IDs
-  rpc ProductsByIDs (ProductsByIDsRequest) returns (ProductsByIDsResponse);
-  rpc OrderBlockedProductsByOrderID (OrderBlockedProductsByOrderIDRequest) returns (OrderBlockedProductsByOrderIDResponse);
+  rpc GetProductsByIDs (GetProductsByIDsRequest) returns (GetProductsByIDsResponse);
+  rpc GetOrderBlockedProductsByOrderID (GetOrderBlockedProductsByOrderIDRequest) returns (GetOrderBlockedProductsByOrderIDResponse);
+  rpc SetOrderBlockedProductsByOrderID (SetOrderBlockedProductsByOrderIDRequest) returns (SetOrderBlockedProductsByOrderIDResponse);
 }
 
 
@@ -34,18 +34,32 @@ message OrderBlockedProduct {
   int32 quantity = 2;
 }
 
-message ProductsByIDsRequest {
+message GetProductsByIDsRequest {
   repeated int64 ids = 1;
 }
 
-message ProductsByIDsResponse {
+message GetProductsByIDsResponse {
   repeated ProductListItem items = 1;
 }
 
-message OrderBlockedProductsByOrderIDRequest {
+message GetOrderBlockedProductsByOrderIDRequest {
   int64 order_id = 1;
 }
 
-message OrderBlockedProductsByOrderIDResponse {
+message GetOrderBlockedProductsByOrderIDResponse {
   repeated OrderBlockedProduct items = 1;
+}
+
+message OrderProduct {
+  int64 product_id = 1;
+  int32 quantity = 2;
+}
+
+message SetOrderBlockedProductsByOrderIDRequest {
+  int64 order_id = 1;
+  repeated OrderProduct items = 2;
+}
+
+message SetOrderBlockedProductsByOrderIDResponse {
+
 }

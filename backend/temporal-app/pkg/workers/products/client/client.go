@@ -1,6 +1,10 @@
 package productstc
 
-import "context"
+import (
+	"context"
+
+	"github.com/shopspring/decimal"
+)
 
 type SetOrderProductsAndBlockIn struct {
 	OrderID       int64
@@ -10,6 +14,7 @@ type SetOrderProductsAndBlockIn struct {
 type OrderProductsItem struct {
 	ProductID int64
 	Quantity  int32
+	Price     decimal.Decimal
 }
 
 type Client interface {

@@ -9,7 +9,7 @@ replace github.com/m11ano/mipt-webdev-course/backend/protos => ../../protos
 require (
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
-	github.com/m11ano/e v1.0.1
+	github.com/m11ano/e v1.0.2
 	github.com/samber/lo v1.50.0
 	github.com/shopspring/decimal v1.4.0
 	google.golang.org/grpc v1.72.1

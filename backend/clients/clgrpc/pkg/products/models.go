@@ -27,3 +27,8 @@ type OrderBlockedProduct struct {
 	ProductID int64
 	Quantity  int32
 }
+
+type SetOrderBlockedProductsByOrderIDIn struct {
+	OrderID       int64
+	OrderProducts []OrderBlockedProduct
+}

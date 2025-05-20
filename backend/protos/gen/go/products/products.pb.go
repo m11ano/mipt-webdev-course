@@ -199,27 +199,27 @@ func (x *OrderBlockedProduct) GetQuantity() int32 {
 	return 0
 }
 
-type ProductsByIDsRequest struct {
+type GetProductsByIDsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProductsByIDsRequest) Reset() {
-	*x = ProductsByIDsRequest{}
+func (x *GetProductsByIDsRequest) Reset() {
+	*x = GetProductsByIDsRequest{}
 	mi := &file_products_products_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProductsByIDsRequest) String() string {
+func (x *GetProductsByIDsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProductsByIDsRequest) ProtoMessage() {}
+func (*GetProductsByIDsRequest) ProtoMessage() {}
 
-func (x *ProductsByIDsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetProductsByIDsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -231,39 +231,39 @@ func (x *ProductsByIDsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProductsByIDsRequest.ProtoReflect.Descriptor instead.
-func (*ProductsByIDsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetProductsByIDsRequest.ProtoReflect.Descriptor instead.
+func (*GetProductsByIDsRequest) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ProductsByIDsRequest) GetIds() []int64 {
+func (x *GetProductsByIDsRequest) GetIds() []int64 {
 	if x != nil {
 		return x.Ids
 	}
 	return nil
 }
 
-type ProductsByIDsResponse struct {
+type GetProductsByIDsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*ProductListItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProductsByIDsResponse) Reset() {
-	*x = ProductsByIDsResponse{}
+func (x *GetProductsByIDsResponse) Reset() {
+	*x = GetProductsByIDsResponse{}
 	mi := &file_products_products_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProductsByIDsResponse) String() string {
+func (x *GetProductsByIDsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProductsByIDsResponse) ProtoMessage() {}
+func (*GetProductsByIDsResponse) ProtoMessage() {}
 
-func (x *ProductsByIDsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetProductsByIDsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -275,39 +275,39 @@ func (x *ProductsByIDsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProductsByIDsResponse.ProtoReflect.Descriptor instead.
-func (*ProductsByIDsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetProductsByIDsResponse.ProtoReflect.Descriptor instead.
+func (*GetProductsByIDsResponse) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ProductsByIDsResponse) GetItems() []*ProductListItem {
+func (x *GetProductsByIDsResponse) GetItems() []*ProductListItem {
 	if x != nil {
 		return x.Items
 	}
 	return nil
 }
 
-type OrderBlockedProductsByOrderIDRequest struct {
+type GetOrderBlockedProductsByOrderIDRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *OrderBlockedProductsByOrderIDRequest) Reset() {
-	*x = OrderBlockedProductsByOrderIDRequest{}
+func (x *GetOrderBlockedProductsByOrderIDRequest) Reset() {
+	*x = GetOrderBlockedProductsByOrderIDRequest{}
 	mi := &file_products_products_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *OrderBlockedProductsByOrderIDRequest) String() string {
+func (x *GetOrderBlockedProductsByOrderIDRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OrderBlockedProductsByOrderIDRequest) ProtoMessage() {}
+func (*GetOrderBlockedProductsByOrderIDRequest) ProtoMessage() {}
 
-func (x *OrderBlockedProductsByOrderIDRequest) ProtoReflect() protoreflect.Message {
+func (x *GetOrderBlockedProductsByOrderIDRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -319,39 +319,39 @@ func (x *OrderBlockedProductsByOrderIDRequest) ProtoReflect() protoreflect.Messa
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OrderBlockedProductsByOrderIDRequest.ProtoReflect.Descriptor instead.
-func (*OrderBlockedProductsByOrderIDRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetOrderBlockedProductsByOrderIDRequest.ProtoReflect.Descriptor instead.
+func (*GetOrderBlockedProductsByOrderIDRequest) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *OrderBlockedProductsByOrderIDRequest) GetOrderId() int64 {
+func (x *GetOrderBlockedProductsByOrderIDRequest) GetOrderId() int64 {
 	if x != nil {
 		return x.OrderId
 	}
 	return 0
 }
 
-type OrderBlockedProductsByOrderIDResponse struct {
+type GetOrderBlockedProductsByOrderIDResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*OrderBlockedProduct `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *OrderBlockedProductsByOrderIDResponse) Reset() {
-	*x = OrderBlockedProductsByOrderIDResponse{}
+func (x *GetOrderBlockedProductsByOrderIDResponse) Reset() {
+	*x = GetOrderBlockedProductsByOrderIDResponse{}
 	mi := &file_products_products_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *OrderBlockedProductsByOrderIDResponse) String() string {
+func (x *GetOrderBlockedProductsByOrderIDResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OrderBlockedProductsByOrderIDResponse) ProtoMessage() {}
+func (*GetOrderBlockedProductsByOrderIDResponse) ProtoMessage() {}
 
-func (x *OrderBlockedProductsByOrderIDResponse) ProtoReflect() protoreflect.Message {
+func (x *GetOrderBlockedProductsByOrderIDResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_products_products_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -363,16 +363,156 @@ func (x *OrderBlockedProductsByOrderIDResponse) ProtoReflect() protoreflect.Mess
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OrderBlockedProductsByOrderIDResponse.ProtoReflect.Descriptor instead.
-func (*OrderBlockedProductsByOrderIDResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetOrderBlockedProductsByOrderIDResponse.ProtoReflect.Descriptor instead.
+func (*GetOrderBlockedProductsByOrderIDResponse) Descriptor() ([]byte, []int) {
 	return file_products_products_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *OrderBlockedProductsByOrderIDResponse) GetItems() []*OrderBlockedProduct {
+func (x *GetOrderBlockedProductsByOrderIDResponse) GetItems() []*OrderBlockedProduct {
 	if x != nil {
 		return x.Items
 	}
 	return nil
+}
+
+type OrderProduct struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderProduct) Reset() {
+	*x = OrderProduct{}
+	mi := &file_products_products_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderProduct) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderProduct) ProtoMessage() {}
+
+func (x *OrderProduct) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderProduct.ProtoReflect.Descriptor instead.
+func (*OrderProduct) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *OrderProduct) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *OrderProduct) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+type SetOrderBlockedProductsByOrderIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Items         []*OrderProduct        `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetOrderBlockedProductsByOrderIDRequest) Reset() {
+	*x = SetOrderBlockedProductsByOrderIDRequest{}
+	mi := &file_products_products_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOrderBlockedProductsByOrderIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOrderBlockedProductsByOrderIDRequest) ProtoMessage() {}
+
+func (x *SetOrderBlockedProductsByOrderIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOrderBlockedProductsByOrderIDRequest.ProtoReflect.Descriptor instead.
+func (*SetOrderBlockedProductsByOrderIDRequest) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *SetOrderBlockedProductsByOrderIDRequest) GetOrderId() int64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+func (x *SetOrderBlockedProductsByOrderIDRequest) GetItems() []*OrderProduct {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type SetOrderBlockedProductsByOrderIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetOrderBlockedProductsByOrderIDResponse) Reset() {
+	*x = SetOrderBlockedProductsByOrderIDResponse{}
+	mi := &file_products_products_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOrderBlockedProductsByOrderIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOrderBlockedProductsByOrderIDResponse) ProtoMessage() {}
+
+func (x *SetOrderBlockedProductsByOrderIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_products_products_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOrderBlockedProductsByOrderIDResponse.ProtoReflect.Descriptor instead.
+func (*SetOrderBlockedProductsByOrderIDResponse) Descriptor() ([]byte, []int) {
+	return file_products_products_proto_rawDescGZIP(), []int{8}
 }
 
 var File_products_products_proto protoreflect.FileDescriptor
@@ -399,18 +539,27 @@ const file_products_products_proto_rawDesc = "" +
 	"\x13OrderBlockedProduct\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x05R\bquantity\"(\n" +
-	"\x14ProductsByIDsRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\"H\n" +
-	"\x15ProductsByIDsResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items\"A\n" +
-	"$OrderBlockedProductsByOrderIDRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\"\\\n" +
-	"%OrderBlockedProductsByOrderIDResponse\x123\n" +
-	"\x05items\x18\x01 \x03(\v2\x1d.products.OrderBlockedProductR\x05items2\xdf\x01\n" +
-	"\bProducts\x12P\n" +
-	"\rProductsByIDs\x12\x1e.products.ProductsByIDsRequest\x1a\x1f.products.ProductsByIDsResponse\x12\x80\x01\n" +
-	"\x1dOrderBlockedProductsByOrderID\x12..products.OrderBlockedProductsByOrderIDRequest\x1a/.products.OrderBlockedProductsByOrderIDResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
+	"\bquantity\x18\x02 \x01(\x05R\bquantity\"+\n" +
+	"\x17GetProductsByIDsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\x03R\x03ids\"K\n" +
+	"\x18GetProductsByIDsResponse\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.products.ProductListItemR\x05items\"D\n" +
+	"'GetOrderBlockedProductsByOrderIDRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\x03R\aorderId\"_\n" +
+	"(GetOrderBlockedProductsByOrderIDResponse\x123\n" +
+	"\x05items\x18\x01 \x03(\v2\x1d.products.OrderBlockedProductR\x05items\"I\n" +
+	"\fOrderProduct\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x02 \x01(\x05R\bquantity\"r\n" +
+	"'SetOrderBlockedProductsByOrderIDRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\x03R\aorderId\x12,\n" +
+	"\x05items\x18\x02 \x03(\v2\x16.products.OrderProductR\x05items\"*\n" +
+	"(SetOrderBlockedProductsByOrderIDResponse2\xfd\x02\n" +
+	"\bProducts\x12Y\n" +
+	"\x10GetProductsByIDs\x12!.products.GetProductsByIDsRequest\x1a\".products.GetProductsByIDsResponse\x12\x89\x01\n" +
+	" GetOrderBlockedProductsByOrderID\x121.products.GetOrderBlockedProductsByOrderIDRequest\x1a2.products.GetOrderBlockedProductsByOrderIDResponse\x12\x89\x01\n" +
+	" SetOrderBlockedProductsByOrderID\x121.products.SetOrderBlockedProductsByOrderIDRequest\x1a2.products.SetOrderBlockedProductsByOrderIDResponseB2Z0m11ano.mipt_webdev_course.products.v1;productsv1b\x06proto3"
 
 var (
 	file_products_products_proto_rawDescOnce sync.Once
@@ -424,33 +573,39 @@ func file_products_products_proto_rawDescGZIP() []byte {
 	return file_products_products_proto_rawDescData
 }
 
-var file_products_products_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_products_products_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_products_products_proto_goTypes = []any{
-	(*ProductListItem)(nil),                       // 0: products.ProductListItem
-	(*OrderBlockedProduct)(nil),                   // 1: products.OrderBlockedProduct
-	(*ProductsByIDsRequest)(nil),                  // 2: products.ProductsByIDsRequest
-	(*ProductsByIDsResponse)(nil),                 // 3: products.ProductsByIDsResponse
-	(*OrderBlockedProductsByOrderIDRequest)(nil),  // 4: products.OrderBlockedProductsByOrderIDRequest
-	(*OrderBlockedProductsByOrderIDResponse)(nil), // 5: products.OrderBlockedProductsByOrderIDResponse
-	(*wrapperspb.StringValue)(nil),                // 6: google.protobuf.StringValue
-	(*timestamppb.Timestamp)(nil),                 // 7: google.protobuf.Timestamp
+	(*ProductListItem)(nil),                          // 0: products.ProductListItem
+	(*OrderBlockedProduct)(nil),                      // 1: products.OrderBlockedProduct
+	(*GetProductsByIDsRequest)(nil),                  // 2: products.GetProductsByIDsRequest
+	(*GetProductsByIDsResponse)(nil),                 // 3: products.GetProductsByIDsResponse
+	(*GetOrderBlockedProductsByOrderIDRequest)(nil),  // 4: products.GetOrderBlockedProductsByOrderIDRequest
+	(*GetOrderBlockedProductsByOrderIDResponse)(nil), // 5: products.GetOrderBlockedProductsByOrderIDResponse
+	(*OrderProduct)(nil),                             // 6: products.OrderProduct
+	(*SetOrderBlockedProductsByOrderIDRequest)(nil),  // 7: products.SetOrderBlockedProductsByOrderIDRequest
+	(*SetOrderBlockedProductsByOrderIDResponse)(nil), // 8: products.SetOrderBlockedProductsByOrderIDResponse
+	(*wrapperspb.StringValue)(nil),                   // 9: google.protobuf.StringValue
+	(*timestamppb.Timestamp)(nil),                    // 10: google.protobuf.Timestamp
 }
 var file_products_products_proto_depIdxs = []int32{
-	6, // 0: products.ProductListItem.image_preview_file_id:type_name -> google.protobuf.StringValue
-	7, // 1: products.ProductListItem.created_at:type_name -> google.protobuf.Timestamp
-	7, // 2: products.ProductListItem.updated_at:type_name -> google.protobuf.Timestamp
-	7, // 3: products.ProductListItem.deleted_at:type_name -> google.protobuf.Timestamp
-	0, // 4: products.ProductsByIDsResponse.items:type_name -> products.ProductListItem
-	1, // 5: products.OrderBlockedProductsByOrderIDResponse.items:type_name -> products.OrderBlockedProduct
-	2, // 6: products.Products.ProductsByIDs:input_type -> products.ProductsByIDsRequest
-	4, // 7: products.Products.OrderBlockedProductsByOrderID:input_type -> products.OrderBlockedProductsByOrderIDRequest
-	3, // 8: products.Products.ProductsByIDs:output_type -> products.ProductsByIDsResponse
-	5, // 9: products.Products.OrderBlockedProductsByOrderID:output_type -> products.OrderBlockedProductsByOrderIDResponse
-	8, // [8:10] is the sub-list for method output_type
-	6, // [6:8] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	9,  // 0: products.ProductListItem.image_preview_file_id:type_name -> google.protobuf.StringValue
+	10, // 1: products.ProductListItem.created_at:type_name -> google.protobuf.Timestamp
+	10, // 2: products.ProductListItem.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 3: products.ProductListItem.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 4: products.GetProductsByIDsResponse.items:type_name -> products.ProductListItem
+	1,  // 5: products.GetOrderBlockedProductsByOrderIDResponse.items:type_name -> products.OrderBlockedProduct
+	6,  // 6: products.SetOrderBlockedProductsByOrderIDRequest.items:type_name -> products.OrderProduct
+	2,  // 7: products.Products.GetProductsByIDs:input_type -> products.GetProductsByIDsRequest
+	4,  // 8: products.Products.GetOrderBlockedProductsByOrderID:input_type -> products.GetOrderBlockedProductsByOrderIDRequest
+	7,  // 9: products.Products.SetOrderBlockedProductsByOrderID:input_type -> products.SetOrderBlockedProductsByOrderIDRequest
+	3,  // 10: products.Products.GetProductsByIDs:output_type -> products.GetProductsByIDsResponse
+	5,  // 11: products.Products.GetOrderBlockedProductsByOrderID:output_type -> products.GetOrderBlockedProductsByOrderIDResponse
+	8,  // 12: products.Products.SetOrderBlockedProductsByOrderID:output_type -> products.SetOrderBlockedProductsByOrderIDResponse
+	10, // [10:13] is the sub-list for method output_type
+	7,  // [7:10] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_products_products_proto_init() }
@@ -464,7 +619,7 @@ func file_products_products_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_products_products_proto_rawDesc), len(file_products_products_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

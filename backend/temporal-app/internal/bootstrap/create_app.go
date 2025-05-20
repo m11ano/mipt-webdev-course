@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	ordersgcl "github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/clients/grpc/orders"
 	productsgcl "github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/infra/temporal"
@@ -19,13 +20,13 @@ var App = fx.Options(
 	fx.Provide(ProdiveTemporalAndConnect),
 	fx.Provide(ProdiveTemporalActivities),
 	// Start && Stop invoke
-	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, productsGCl *productsgcl.ClientConn, tClient temporal.TemporalClient, productsActivities *activities.Controller) {
+	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, productsGCl *productsgcl.ClientConn, ordersGCl *ordersgcl.ClientConn, tClient temporal.TemporalClient, productsActivities *activities.Controller) {
 
 		productsWorker := RegisterWorkers(tClient, productsActivities)
 
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				err := ConnectToGRPCServer(ctx, productsGCl.Conn)
+				err := ConnectToGRPCServer(ctx, productsGCl.Conn, ordersGCl.Conn)
 				if err != nil {
 					return err
 				}

@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"log/slog"
 
+	ordersgcl "github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/clients/grpc/orders"
 	productsgcl "github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/clients/grpc/products"
 	"github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/infra/temporal"
@@ -28,8 +29,8 @@ func ProdiveTemporalAndConnect(config config.Config, logger *slog.Logger, shutdo
 	return c
 }
 
-func ProdiveTemporalActivities(productsGRPC *productsgcl.ClientConn) *activities.Controller {
-	activitiesController := activities.NewController(productsGRPC)
+func ProdiveTemporalActivities(productsGRPC *productsgcl.ClientConn, ordersGRPC *ordersgcl.ClientConn) *activities.Controller {
+	activitiesController := activities.NewController(productsGRPC, ordersGRPC)
 	return activitiesController
 }
 
@@ -37,6 +38,7 @@ func RegisterWorkers(tClient temporal.TemporalClient, productsActivities *activi
 	productsWorker := productsw.NewWorker(tClient)
 
 	productsWorker.RegisterWorkflow(workflows.SetOrderProductsAndBlock)
+
 	productsWorker.RegisterActivity(productsActivities)
 
 	return productsWorker

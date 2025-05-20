@@ -2,6 +2,10 @@ module github.com/m11ano/mipt-webdev-course/backend/services/orders
 
 go 1.23.3
 
+require github.com/m11ano/mipt-webdev-course/backend/protos v0.0.0
+
+replace github.com/m11ano/mipt-webdev-course/backend/protos => ../../protos
+
 require github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc v0.0.0
 
 replace github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc => ../../clients/clgrpc
@@ -13,8 +17,6 @@ replace github.com/m11ano/mipt-webdev-course/backend/temporal-app => ../../tempo
 require github.com/m11ano/mipt-webdev-course/backend/clients/auth v0.0.0
 
 replace github.com/m11ano/mipt-webdev-course/backend/clients/auth => ../../clients/auth
-
-replace github.com/m11ano/mipt-webdev-course/backend/protos => ../../protos
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -29,7 +31,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/m11ano/e v1.0.1
+	github.com/m11ano/e v1.0.2
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/samber/lo v1.50.0
 	github.com/shopspring/decimal v1.4.0
@@ -39,6 +41,7 @@ require (
 	go.uber.org/fx v1.24.0
 	golang.org/x/sync v0.14.0
 	google.golang.org/grpc v1.72.1
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -71,7 +74,6 @@ require (
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/m11ano/mipt-webdev-course/backend/protos v0.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -96,9 +98,8 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505200425-f936aa4a68b2 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250512202823-5a2f75b736a9 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250512202823-5a2f75b736a9 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect

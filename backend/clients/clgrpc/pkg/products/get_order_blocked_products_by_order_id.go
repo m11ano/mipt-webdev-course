@@ -3,12 +3,17 @@ package productscl
 import (
 	"context"
 
+	"github.com/m11ano/e"
 	productsv1 "github.com/m11ano/mipt-webdev-course/backend/protos/gen/go/products"
 )
 
 func (c *ClientImpl) GetOrderBlockedProductsByOrderID(ctx context.Context, orderID int64) ([]*OrderBlockedProduct, error) {
-	items, err := c.api.OrderBlockedProductsByOrderID(ctx, &productsv1.OrderBlockedProductsByOrderIDRequest{OrderId: orderID})
+
+	items, err := c.api.GetOrderBlockedProductsByOrderID(ctx, &productsv1.GetOrderBlockedProductsByOrderIDRequest{OrderId: orderID})
 	if err != nil {
+		if ok, lgErr := e.ErrConvertGRPCToLogic(err); ok {
+			return nil, lgErr
+		}
 		return nil, err
 	}
 

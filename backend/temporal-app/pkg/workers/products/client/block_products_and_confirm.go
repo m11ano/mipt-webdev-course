@@ -27,6 +27,7 @@ func (c *ClientImpl) SetOrderProductsAndBlock(ctx context.Context, input SetOrde
 		workIn.OrderProducts[i] = workflows.OrderProductsItem{
 			ProductID: item.ProductID,
 			Quantity:  item.Quantity,
+			Price:     item.Price,
 		}
 	}
 
@@ -42,7 +43,11 @@ func (c *ClientImpl) SetOrderProductsAndBlock(ctx context.Context, input SetOrde
 	}
 
 	if !result.IsOk {
-		return ErrSetOrderProductsAndBlockCantReserve
+		if result.ErrorCode == 1 {
+			return ErrSetOrderProductsAndBlockCantReserve
+		}
+
+		return e.NewErrorFrom(ErrWorkflowResutError).Wrap(err)
 	}
 
 	return nil

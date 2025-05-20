@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/m11ano/e"
@@ -165,22 +166,20 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 		return nil, ErrOrderInvalidProducts
 	}
 
-	/*
-		// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
-		products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
-		if err != nil {
-			return nil, err
-		}
+	// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
+	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
+	if err != nil {
+		return nil, err
+	}
 
-		if len(products) != len(productIDs) {
-			return nil, ErrOrderInvalidProducts
-		}
+	if len(products) != len(productIDs) {
+		return nil, ErrOrderInvalidProducts
+	}
 
-		err = uc.checkStockAvailable(products, input.Products)
-		if err != nil {
-			return nil, err
-		}
-	*/
+	err = uc.checkStockAvailable(products, input.Products)
+	if err != nil {
+		return nil, err
+	}
 
 	order := domain.NewOrder(0)
 	order.ClientName = input.Details.ClientName
@@ -189,15 +188,36 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	order.ClientPhone = input.Details.ClientPhone
 	order.DeliveryAddress = input.Details.DeliveryAddress
 
-	err := uc.repo.Create(ctx, order)
+	err = uc.repo.Create(ctx, order)
 	if err != nil {
 		return nil, err
 	}
 
 	//Запускаем воркфлоу
-	err = uc.productsTCl.SetOrderProductsAndBlock(ctx, productstc.SetOrderProductsAndBlockIn{
-		OrderID: order.ID,
-	})
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	flowIn := productstc.SetOrderProductsAndBlockIn{
+		OrderID:       order.ID,
+		OrderProducts: make([]productstc.OrderProductsItem, len(input.Products)),
+	}
+
+	for i, item := range input.Products {
+		productItem, ok := lo.Find(products, func(product *productscl.ProductListItem) bool {
+			return product.ID == item.ID
+		})
+		if !ok {
+			return nil, e.ErrInternal
+		}
+
+		flowIn.OrderProducts[i] = productstc.OrderProductsItem{
+			ProductID: item.ID,
+			Quantity:  item.Quantity,
+			Price:     productItem.Price,
+		}
+	}
+
+	err = uc.productsTCl.SetOrderProductsAndBlock(ctxWithTimeout, flowIn)
 	if err != nil {
 		if errors.Is(err, productstc.ErrSetOrderProductsAndBlockCantReserve) {
 			return nil, ErrOrderInvalidProductsQuantity

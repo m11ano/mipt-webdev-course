@@ -14,3 +14,7 @@ grpc:
             endpoint: "127.0.0.1:8090"
             retries: 3
             timeout_ms: 100
+        orders:
+            endpoint: "127.0.0.1:8091"
+            retries: 3
+            timeout_ms: 100

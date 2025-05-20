@@ -25,6 +25,11 @@ type Config struct {
 				Retries   int    `yaml:"retries" env:"GRPC_CLIENTS_PRODUCTS_RETRIES" env-default:"3"`
 				TimeoutMS int    `yaml:"timeout_ms" env:"GRPC_CLIENTS_PRODUCTS_TIMEOUT_MS" env-default:"100"`
 			} `yaml:"products"`
+			Orders struct {
+				Endpoint  string `yaml:"endpoint" env:"GRPC_CLIENTS_ORDERS_ENDPOINT" env-default:"127.0.0.1:8091"`
+				Retries   int    `yaml:"retries" env:"GRPC_CLIENTS_ORDERS_RETRIES" env-default:"3"`
+				TimeoutMS int    `yaml:"timeout_ms" env:"GRPC_CLIENTS_ORDERS_TIMEOUT_MS" env-default:"100"`
+			} `yaml:"orders"`
 		} `yaml:"clients"`
 	} `yaml:"grpc"`
 }

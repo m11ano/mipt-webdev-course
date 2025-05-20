@@ -11,7 +11,9 @@ replace github.com/m11ano/mipt-webdev-course/backend/protos => ../protos
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
-	github.com/m11ano/e v1.0.1
+	github.com/m11ano/e v1.0.2
+	github.com/samber/lo v1.50.0
+	github.com/shopspring/decimal v1.4.0
 	go.temporal.io/sdk v1.34.0
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.72.1
@@ -38,8 +40,6 @@ require (
 	github.com/nexus-rpc/sdk-go v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
-	github.com/samber/lo v1.50.0 // indirect
-	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.temporal.io/api v1.46.0 // indirect
@@ -52,8 +52,8 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505200425-f936aa4a68b2 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250512202823-5a2f75b736a9 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250512202823-5a2f75b736a9 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect

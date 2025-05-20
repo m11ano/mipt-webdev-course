@@ -30,12 +30,17 @@ func NewClientConn(cfg Config, logger *slog.Logger) (*grpc.ClientConn, error) {
 		logging.WithLogOnEvents(logging.PayloadReceived, logging.PayloadSent),
 	}
 
+	intercepts := []grpc.UnaryClientInterceptor{
+		grpcretry.UnaryClientInterceptor(retryOpts...),
+	}
+
+	if logger != nil {
+		intercepts = append(intercepts, logging.UnaryClientInterceptor(InterceptorLogger(logger), logOpts...))
+	}
+
 	cc, err := grpc.NewClient(cfg.Addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithChainUnaryInterceptor(
-			logging.UnaryClientInterceptor(InterceptorLogger(logger), logOpts...),
-			grpcretry.UnaryClientInterceptor(retryOpts...),
-		),
+		grpc.WithChainUnaryInterceptor(intercepts...),
 	)
 	if err != nil {
 		return nil, err
