@@ -12,6 +12,7 @@ services:
       - swagger-ui
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: always
     ports:
       - "${NGINX_PORT:-80}:80"
     networks:
@@ -23,6 +24,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
+    restart: always
     volumes:
       - minio-data:/data
     networks:
@@ -60,6 +62,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    restart: always
     volumes:
       - auth-db-data:/var/lib/postgresql/data
     networks:
@@ -76,7 +79,7 @@ services:
       HTTP_UNDER_PROXY: true
     depends_on:
       - service-auth-db
-    restart: on-failure
+    restart: always
     networks:
       - internal
 
@@ -92,6 +95,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    restart: always
     volumes:
       - products-db-data:/var/lib/postgresql/data
     networks:
@@ -112,7 +116,7 @@ services:
     depends_on:
       - temporal
       - service-products-db
-    restart: on-failure
+    restart: always
     networks:
       - internal
 
@@ -127,7 +131,7 @@ services:
       STORAGE_S3_URL: /files
     depends_on:
       - service-products-db
-    restart: on-failure
+    restart: always
     networks:
       - internal
 
@@ -143,6 +147,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    restart: always
     volumes:
       - orders-db-data:/var/lib/postgresql/data
     networks:
@@ -163,7 +168,7 @@ services:
       - temporal
       - temporal-app
       - service-orders-db
-    restart: on-failure
+    restart: always
     networks:
       - internal
 
@@ -179,6 +184,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    restart: always
     volumes:
       - temporal-db-data:/var/lib/postgresql/data
     networks:
@@ -203,6 +209,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: always
     ports:
       - "7233:7233"
     networks:
@@ -232,7 +239,7 @@ services:
       TEMPORAL_ENDPOINT: temporal:7233
     depends_on:
       - temporal
-    restart: on-failure
+    restart: always
     networks:
       - internal
 

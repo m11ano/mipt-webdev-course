@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"log/slog"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/m11ano/e"
@@ -61,8 +59,6 @@ func (ctrl *Controller) CreateOrderHandler(c *fiber.Ctx) error {
 	if !ok {
 		return e.NewErrorFrom(e.ErrBadRequest).AddDetails(errMsg)
 	}
-
-	ctrl.logger.Info("IN", slog.Any("in", in))
 
 	createIn := usecase.OrderCreateIn{
 		Details: usecase.OrderCreateInDetails{
