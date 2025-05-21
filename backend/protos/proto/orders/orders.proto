@@ -4,6 +4,9 @@ package orders;
 
 option go_package = "m11ano.mipt_webdev_course.orders.v1;ordersv1";
 
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
 // Orders service
 service Orders {
   rpc SetOrderComposition (SetOrderCompositionRequest) returns (SetOrderCompositionResponse);
@@ -16,10 +19,20 @@ message OrderProduct {
   string price = 3;
 }
 
+message OrderProductList {
+  repeated OrderProduct items = 1;
+}
+
 message SetOrderCompositionRequest {
   int64 order_id = 1;
   bool is_ok = 2;
-  repeated OrderProduct items = 3;
+
+  oneof optional_products {
+    OrderProductList items_set = 3;
+    google.protobuf.Empty no_items = 4;
+  }
+
+  google.protobuf.StringValue order_status = 5;
 }
 
 message SetOrderCompositionResponse {

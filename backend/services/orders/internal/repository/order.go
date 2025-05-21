@@ -94,6 +94,10 @@ func (r *Order) buildWhereForList(listOptions usecase.OrderListOptions, withDele
 		where = append(where, squirrel.Expr("deleted_at IS NULL"))
 	}
 
+	if listOptions.OnlyCreated != nil {
+		where = append(where, squirrel.NotEq{"status": domain.OrderStatusNew})
+	}
+
 	return where
 }
 
@@ -127,9 +131,25 @@ func (r *Order) buildSortForList(listOptions usecase.OrderListOptions) []string 
 func (r *Order) buildPartUpdate(updateData usecase.OrderPartUpdateData) map[string]any {
 	result := make(map[string]any)
 
-	// if updateData.IsPublished != nil {
-	// 	result["is_published"] = *updateData.IsPublished
-	// }
+	if updateData.ClientEmail != nil {
+		result["client_email"] = *updateData.ClientEmail
+	}
+
+	if updateData.ClientName != nil {
+		result["client_name"] = *updateData.ClientName
+	}
+
+	if updateData.ClientPhone != nil {
+		result["client_phone"] = *updateData.ClientPhone
+	}
+
+	if updateData.ClientSurname != nil {
+		result["client_surname"] = *updateData.ClientSurname
+	}
+
+	if updateData.DeliveryAddress != nil {
+		result["delivery_address"] = *updateData.DeliveryAddress
+	}
 
 	return result
 }

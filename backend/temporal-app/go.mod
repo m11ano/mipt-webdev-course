@@ -11,7 +11,7 @@ replace github.com/m11ano/mipt-webdev-course/backend/protos => ../protos
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
-	github.com/m11ano/e v1.0.2
+	github.com/m11ano/e v1.0.3
 	github.com/samber/lo v1.50.0
 	github.com/shopspring/decimal v1.4.0
 	go.temporal.io/sdk v1.34.0

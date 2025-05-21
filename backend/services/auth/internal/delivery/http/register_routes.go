@@ -3,11 +3,11 @@ package http
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
-	"github.com/m11ano/mipt-webdev-course/backend/clients/auth"
 	_ "github.com/m11ano/mipt-webdev-course/backend/services/auth/docs"
 	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/delivery/http/controller"
 	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/delivery/http/middleware"
 	"github.com/m11ano/mipt-webdev-course/backend/services/auth/internal/infra/config"
+	"github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth"
 )
 
 func RegisterRoutes(app *fiber.App, config config.Config, ctrl *controller.Controller) {

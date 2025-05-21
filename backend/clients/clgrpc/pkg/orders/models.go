@@ -13,5 +13,6 @@ type OrderCompositionItem struct {
 type SetOrderCompositionIn struct {
 	OrderID       int64
 	IsOk          bool
-	OrderProducts []OrderCompositionItem
+	OrderProducts *[]OrderCompositionItem
+	OrderStatus   *string
 }

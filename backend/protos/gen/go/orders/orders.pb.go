@@ -9,6 +9,8 @@ package ordersv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -81,18 +83,67 @@ func (x *OrderProduct) GetPrice() string {
 	return ""
 }
 
-type SetOrderCompositionRequest struct {
+type OrderProductList struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	IsOk          bool                   `protobuf:"varint,2,opt,name=is_ok,json=isOk,proto3" json:"is_ok,omitempty"`
-	Items         []*OrderProduct        `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	Items         []*OrderProduct        `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *OrderProductList) Reset() {
+	*x = OrderProductList{}
+	mi := &file_orders_orders_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderProductList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderProductList) ProtoMessage() {}
+
+func (x *OrderProductList) ProtoReflect() protoreflect.Message {
+	mi := &file_orders_orders_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderProductList.ProtoReflect.Descriptor instead.
+func (*OrderProductList) Descriptor() ([]byte, []int) {
+	return file_orders_orders_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *OrderProductList) GetItems() []*OrderProduct {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type SetOrderCompositionRequest struct {
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	OrderId int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	IsOk    bool                   `protobuf:"varint,2,opt,name=is_ok,json=isOk,proto3" json:"is_ok,omitempty"`
+	// Types that are valid to be assigned to OptionalProducts:
+	//
+	//	*SetOrderCompositionRequest_ItemsSet
+	//	*SetOrderCompositionRequest_NoItems
+	OptionalProducts isSetOrderCompositionRequest_OptionalProducts `protobuf_oneof:"optional_products"`
+	OrderStatus      *wrapperspb.StringValue                       `protobuf:"bytes,5,opt,name=order_status,json=orderStatus,proto3" json:"order_status,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
 func (x *SetOrderCompositionRequest) Reset() {
 	*x = SetOrderCompositionRequest{}
-	mi := &file_orders_orders_proto_msgTypes[1]
+	mi := &file_orders_orders_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -104,7 +155,7 @@ func (x *SetOrderCompositionRequest) String() string {
 func (*SetOrderCompositionRequest) ProtoMessage() {}
 
 func (x *SetOrderCompositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_orders_orders_proto_msgTypes[1]
+	mi := &file_orders_orders_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -117,7 +168,7 @@ func (x *SetOrderCompositionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetOrderCompositionRequest.ProtoReflect.Descriptor instead.
 func (*SetOrderCompositionRequest) Descriptor() ([]byte, []int) {
-	return file_orders_orders_proto_rawDescGZIP(), []int{1}
+	return file_orders_orders_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SetOrderCompositionRequest) GetOrderId() int64 {
@@ -134,12 +185,53 @@ func (x *SetOrderCompositionRequest) GetIsOk() bool {
 	return false
 }
 
-func (x *SetOrderCompositionRequest) GetItems() []*OrderProduct {
+func (x *SetOrderCompositionRequest) GetOptionalProducts() isSetOrderCompositionRequest_OptionalProducts {
 	if x != nil {
-		return x.Items
+		return x.OptionalProducts
 	}
 	return nil
 }
+
+func (x *SetOrderCompositionRequest) GetItemsSet() *OrderProductList {
+	if x != nil {
+		if x, ok := x.OptionalProducts.(*SetOrderCompositionRequest_ItemsSet); ok {
+			return x.ItemsSet
+		}
+	}
+	return nil
+}
+
+func (x *SetOrderCompositionRequest) GetNoItems() *emptypb.Empty {
+	if x != nil {
+		if x, ok := x.OptionalProducts.(*SetOrderCompositionRequest_NoItems); ok {
+			return x.NoItems
+		}
+	}
+	return nil
+}
+
+func (x *SetOrderCompositionRequest) GetOrderStatus() *wrapperspb.StringValue {
+	if x != nil {
+		return x.OrderStatus
+	}
+	return nil
+}
+
+type isSetOrderCompositionRequest_OptionalProducts interface {
+	isSetOrderCompositionRequest_OptionalProducts()
+}
+
+type SetOrderCompositionRequest_ItemsSet struct {
+	ItemsSet *OrderProductList `protobuf:"bytes,3,opt,name=items_set,json=itemsSet,proto3,oneof"`
+}
+
+type SetOrderCompositionRequest_NoItems struct {
+	NoItems *emptypb.Empty `protobuf:"bytes,4,opt,name=no_items,json=noItems,proto3,oneof"`
+}
+
+func (*SetOrderCompositionRequest_ItemsSet) isSetOrderCompositionRequest_OptionalProducts() {}
+
+func (*SetOrderCompositionRequest_NoItems) isSetOrderCompositionRequest_OptionalProducts() {}
 
 type SetOrderCompositionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -149,7 +241,7 @@ type SetOrderCompositionResponse struct {
 
 func (x *SetOrderCompositionResponse) Reset() {
 	*x = SetOrderCompositionResponse{}
-	mi := &file_orders_orders_proto_msgTypes[2]
+	mi := &file_orders_orders_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -161,7 +253,7 @@ func (x *SetOrderCompositionResponse) String() string {
 func (*SetOrderCompositionResponse) ProtoMessage() {}
 
 func (x *SetOrderCompositionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_orders_orders_proto_msgTypes[2]
+	mi := &file_orders_orders_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -174,7 +266,7 @@ func (x *SetOrderCompositionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetOrderCompositionResponse.ProtoReflect.Descriptor instead.
 func (*SetOrderCompositionResponse) Descriptor() ([]byte, []int) {
-	return file_orders_orders_proto_rawDescGZIP(), []int{2}
+	return file_orders_orders_proto_rawDescGZIP(), []int{3}
 }
 
 type CheckOrdersExistsByProductIDRequest struct {
@@ -186,7 +278,7 @@ type CheckOrdersExistsByProductIDRequest struct {
 
 func (x *CheckOrdersExistsByProductIDRequest) Reset() {
 	*x = CheckOrdersExistsByProductIDRequest{}
-	mi := &file_orders_orders_proto_msgTypes[3]
+	mi := &file_orders_orders_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +290,7 @@ func (x *CheckOrdersExistsByProductIDRequest) String() string {
 func (*CheckOrdersExistsByProductIDRequest) ProtoMessage() {}
 
 func (x *CheckOrdersExistsByProductIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_orders_orders_proto_msgTypes[3]
+	mi := &file_orders_orders_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +303,7 @@ func (x *CheckOrdersExistsByProductIDRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use CheckOrdersExistsByProductIDRequest.ProtoReflect.Descriptor instead.
 func (*CheckOrdersExistsByProductIDRequest) Descriptor() ([]byte, []int) {
-	return file_orders_orders_proto_rawDescGZIP(), []int{3}
+	return file_orders_orders_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CheckOrdersExistsByProductIDRequest) GetProductId() int64 {
@@ -230,7 +322,7 @@ type CheckOrdersExistsByProductIDResponse struct {
 
 func (x *CheckOrdersExistsByProductIDResponse) Reset() {
 	*x = CheckOrdersExistsByProductIDResponse{}
-	mi := &file_orders_orders_proto_msgTypes[4]
+	mi := &file_orders_orders_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +334,7 @@ func (x *CheckOrdersExistsByProductIDResponse) String() string {
 func (*CheckOrdersExistsByProductIDResponse) ProtoMessage() {}
 
 func (x *CheckOrdersExistsByProductIDResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_orders_orders_proto_msgTypes[4]
+	mi := &file_orders_orders_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,7 +347,7 @@ func (x *CheckOrdersExistsByProductIDResponse) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use CheckOrdersExistsByProductIDResponse.ProtoReflect.Descriptor instead.
 func (*CheckOrdersExistsByProductIDResponse) Descriptor() ([]byte, []int) {
-	return file_orders_orders_proto_rawDescGZIP(), []int{4}
+	return file_orders_orders_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CheckOrdersExistsByProductIDResponse) GetExists() bool {
@@ -269,16 +361,21 @@ var File_orders_orders_proto protoreflect.FileDescriptor
 
 const file_orders_orders_proto_rawDesc = "" +
 	"\n" +
-	"\x13orders/orders.proto\x12\x06orders\"_\n" +
+	"\x13orders/orders.proto\x12\x06orders\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x1bgoogle/protobuf/empty.proto\"_\n" +
 	"\fOrderProduct\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x02 \x01(\x05R\bquantity\x12\x14\n" +
-	"\x05price\x18\x03 \x01(\tR\x05price\"x\n" +
+	"\x05price\x18\x03 \x01(\tR\x05price\">\n" +
+	"\x10OrderProductList\x12*\n" +
+	"\x05items\x18\x01 \x03(\v2\x14.orders.OrderProductR\x05items\"\x90\x02\n" +
 	"\x1aSetOrderCompositionRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x13\n" +
-	"\x05is_ok\x18\x02 \x01(\bR\x04isOk\x12*\n" +
-	"\x05items\x18\x03 \x03(\v2\x14.orders.OrderProductR\x05items\"\x1d\n" +
+	"\x05is_ok\x18\x02 \x01(\bR\x04isOk\x127\n" +
+	"\titems_set\x18\x03 \x01(\v2\x18.orders.OrderProductListH\x00R\bitemsSet\x123\n" +
+	"\bno_items\x18\x04 \x01(\v2\x16.google.protobuf.EmptyH\x00R\anoItems\x12?\n" +
+	"\forder_status\x18\x05 \x01(\v2\x1c.google.protobuf.StringValueR\vorderStatusB\x13\n" +
+	"\x11optional_products\"\x1d\n" +
 	"\x1bSetOrderCompositionResponse\"D\n" +
 	"#CheckOrdersExistsByProductIDRequest\x12\x1d\n" +
 	"\n" +
@@ -301,25 +398,31 @@ func file_orders_orders_proto_rawDescGZIP() []byte {
 	return file_orders_orders_proto_rawDescData
 }
 
-var file_orders_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_orders_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_orders_orders_proto_goTypes = []any{
 	(*OrderProduct)(nil),                         // 0: orders.OrderProduct
-	(*SetOrderCompositionRequest)(nil),           // 1: orders.SetOrderCompositionRequest
-	(*SetOrderCompositionResponse)(nil),          // 2: orders.SetOrderCompositionResponse
-	(*CheckOrdersExistsByProductIDRequest)(nil),  // 3: orders.CheckOrdersExistsByProductIDRequest
-	(*CheckOrdersExistsByProductIDResponse)(nil), // 4: orders.CheckOrdersExistsByProductIDResponse
+	(*OrderProductList)(nil),                     // 1: orders.OrderProductList
+	(*SetOrderCompositionRequest)(nil),           // 2: orders.SetOrderCompositionRequest
+	(*SetOrderCompositionResponse)(nil),          // 3: orders.SetOrderCompositionResponse
+	(*CheckOrdersExistsByProductIDRequest)(nil),  // 4: orders.CheckOrdersExistsByProductIDRequest
+	(*CheckOrdersExistsByProductIDResponse)(nil), // 5: orders.CheckOrdersExistsByProductIDResponse
+	(*emptypb.Empty)(nil),                        // 6: google.protobuf.Empty
+	(*wrapperspb.StringValue)(nil),               // 7: google.protobuf.StringValue
 }
 var file_orders_orders_proto_depIdxs = []int32{
-	0, // 0: orders.SetOrderCompositionRequest.items:type_name -> orders.OrderProduct
-	1, // 1: orders.Orders.SetOrderComposition:input_type -> orders.SetOrderCompositionRequest
-	3, // 2: orders.Orders.CheckOrdersExistsByProductID:input_type -> orders.CheckOrdersExistsByProductIDRequest
-	2, // 3: orders.Orders.SetOrderComposition:output_type -> orders.SetOrderCompositionResponse
-	4, // 4: orders.Orders.CheckOrdersExistsByProductID:output_type -> orders.CheckOrdersExistsByProductIDResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: orders.OrderProductList.items:type_name -> orders.OrderProduct
+	1, // 1: orders.SetOrderCompositionRequest.items_set:type_name -> orders.OrderProductList
+	6, // 2: orders.SetOrderCompositionRequest.no_items:type_name -> google.protobuf.Empty
+	7, // 3: orders.SetOrderCompositionRequest.order_status:type_name -> google.protobuf.StringValue
+	2, // 4: orders.Orders.SetOrderComposition:input_type -> orders.SetOrderCompositionRequest
+	4, // 5: orders.Orders.CheckOrdersExistsByProductID:input_type -> orders.CheckOrdersExistsByProductIDRequest
+	3, // 6: orders.Orders.SetOrderComposition:output_type -> orders.SetOrderCompositionResponse
+	5, // 7: orders.Orders.CheckOrdersExistsByProductID:output_type -> orders.CheckOrdersExistsByProductIDResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_orders_orders_proto_init() }
@@ -327,13 +430,17 @@ func file_orders_orders_proto_init() {
 	if File_orders_orders_proto != nil {
 		return
 	}
+	file_orders_orders_proto_msgTypes[2].OneofWrappers = []any{
+		(*SetOrderCompositionRequest_ItemsSet)(nil),
+		(*SetOrderCompositionRequest_NoItems)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_orders_orders_proto_rawDesc), len(file_orders_orders_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

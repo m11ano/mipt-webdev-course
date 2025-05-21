@@ -23,4 +23,9 @@ func RegisterRoutes(app *fiber.App, config config.Config, ctrl *controller.Contr
 	}
 
 	serviceGroup.Post("/", ctrl.CreateOrderHandler)
+	serviceGroup.Put("/:id<min(1)>", ctrl.UpdateOrderHandler)
+	serviceGroup.Put("/:id<min(1)>/status", ctrl.SetOrderStatusHandler)
+	serviceGroup.Get("/", ctrl.GetOrdersHandler)
+	serviceGroup.Get("/:id<min(1)>", ctrl.GetOrderHandler)
+	serviceGroup.Get("/:id<min(1)>/:secret_key<guid>", ctrl.GetOrderWithSecretKeyHandler)
 }

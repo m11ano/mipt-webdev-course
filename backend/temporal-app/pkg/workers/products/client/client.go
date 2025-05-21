@@ -6,9 +6,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type SetOrderProductsAndBlockIn struct {
+type SetOrderProductsAndStatusIn struct {
+	NotWait       bool
 	OrderID       int64
-	OrderProducts []OrderProductsItem
+	OrderProducts *[]OrderProductsItem
+	OrderStatus   *string
 }
 
 type OrderProductsItem struct {
@@ -18,7 +20,7 @@ type OrderProductsItem struct {
 }
 
 type Client interface {
-	SetOrderProductsAndBlock(ctx context.Context, input SetOrderProductsAndBlockIn) error
+	SetOrderProductsAndStatus(ctx context.Context, input SetOrderProductsAndStatusIn) error
 }
 
 var WorkflowOrderProductsPrefx = "order_products"

@@ -26,7 +26,6 @@ type GetProductsOut struct {
 // @Produce  json
 // @Param limit query int false "Limit"
 // @Param offset query int false "Offset"
-// @Param ids query string false "IDs of products"
 // @Success 200 {object} GetProductsOut
 // @Failure 400 {object} middleware.ErrorJSON
 // @Router /products [get]

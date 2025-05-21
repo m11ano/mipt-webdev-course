@@ -2,18 +2,19 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/m11ano/e"
+	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/delivery/http/middleware"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/delivery/http/validation"
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase"
+	"github.com/shopspring/decimal"
 )
 
-type CreateOrderIn struct {
-	Details  CreateOrderInDetails   `json:"details" validate:"required"`
-	Products []CreateOrderInProduct `json:"products" validate:"required,min=1"`
+type UpdateOrderIn struct {
+	Details  UpdateOrderInDetails   `json:"details" validate:"required"`
+	Products []UpdateOrderInProduct `json:"products" validate:"required,min=1"`
 }
 
-type CreateOrderInDetails struct {
+type UpdateOrderInDetails struct {
 	ClientName      string `json:"client_name" validate:"required,min=1,max=150"`
 	ClientSurname   string `json:"client_surname" validate:"required,min=1,max=150"`
 	ClientEmail     string `json:"client_email" validate:"required,email"`
@@ -21,45 +22,53 @@ type CreateOrderInDetails struct {
 	DeliveryAddress string `json:"delivery_address" validate:"required,min=1,max=150"`
 }
 
-type CreateOrderInProduct struct {
-	ID       int64 `json:"id" validate:"gte=0"`
-	Quantity int32 `json:"quantity" validate:"gte=1"`
+type UpdateOrderInProduct struct {
+	ID       int64   `json:"id" validate:"gte=0"`
+	Quantity int32   `json:"quantity" validate:"gte=1"`
+	Price    float64 `json:"price" validate:"gte=0"`
 }
 
-type CreateOrderOut struct {
-	ID        int64     `json:"id"`
-	SecretKey uuid.UUID `json:"secret_key"`
-}
-
-func (ctrl *Controller) CreateOrderHandlerValidate(in *CreateOrderIn) (isOk bool, errMsg []string) {
+func (ctrl *Controller) UpdateOrderHandlerValidate(in *UpdateOrderIn) (isOk bool, errMsg []string) {
 	if err := ctrl.vldtr.Struct(in); err != nil {
 		return validation.FormatErrors(err)
 	}
 	return true, []string{}
 }
 
-// @Summary Создать заказ
+// @Summary Обновить заказ
+// @Security BearerAuth
 // @Tags orders
 // @Accept  json
-// @Produce  json
-// @Param request body CreateOrderIn true "JSON"
-// @Success 201 {object} CreateOrderOut
+// @Param request body UpdateOrderIn true "JSON"
+// @Param id path int true "Order ID"
+// @Success 200 {string} string "OK"
 // @Failure 400 {object} middleware.ErrorJSON
-// @Router /orders [post]
-func (ctrl *Controller) CreateOrderHandler(c *fiber.Ctx) error {
+// @Router /orders/{id} [put]
+func (ctrl *Controller) UpdateOrderHandler(c *fiber.Ctx) error {
 
-	in := &CreateOrderIn{}
+	authData := middleware.ExtractAuthData(c)
+
+	if !authData.IsAuth {
+		return e.ErrUnauthorized
+	}
+
+	in := &UpdateOrderIn{}
 
 	if err := c.BodyParser(in); err != nil {
 		return e.NewErrorFrom(e.ErrBadRequest).Wrap(err).SetMessage("cannot parse request body")
 	}
 
-	ok, errMsg := ctrl.CreateOrderHandlerValidate(in)
+	ok, errMsg := ctrl.UpdateOrderHandlerValidate(in)
 	if !ok {
 		return e.NewErrorFrom(e.ErrBadRequest).AddDetails(errMsg)
 	}
 
-	createIn := usecase.OrderCreateIn{
+	orderID, err := c.ParamsInt("id")
+	if err != nil {
+		return err
+	}
+
+	updateIn := usecase.OrderUpdateIn{
 		Details: usecase.OrderDataDetailsIn{
 			ClientName:      in.Details.ClientName,
 			ClientSurname:   in.Details.ClientSurname,
@@ -67,25 +76,21 @@ func (ctrl *Controller) CreateOrderHandler(c *fiber.Ctx) error {
 			ClientPhone:     in.Details.ClientPhone,
 			DeliveryAddress: in.Details.DeliveryAddress,
 		},
-		Products: make([]usecase.OrderProductIn, len(in.Products)),
+		Products: make([]usecase.OrderProductWithPrice, len(in.Products)),
 	}
 
 	for i, item := range in.Products {
-		createIn.Products[i] = usecase.OrderProductIn{
+		updateIn.Products[i] = usecase.OrderProductWithPrice{
 			ID:       item.ID,
 			Quantity: item.Quantity,
+			Price:    decimal.NewFromFloat(item.Price),
 		}
 	}
 
-	order, err := ctrl.orderUC.Create(c.Context(), createIn)
+	err = ctrl.orderUC.Update(c.Context(), int64(orderID), updateIn)
 	if err != nil {
 		return err
 	}
 
-	result := CreateOrderOut{
-		ID:        order.ID,
-		SecretKey: order.SecretKey,
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.SendStatus(fiber.StatusOK)
 }

@@ -2,9 +2,9 @@ module github.com/m11ano/mipt-webdev-course/backend/services/products
 
 go 1.23.3
 
-require github.com/m11ano/mipt-webdev-course/backend/clients/auth v0.0.0
+require github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth v0.0.0
 
-replace github.com/m11ano/mipt-webdev-course/backend/clients/auth => ../../clients/auth
+replace github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth => ../auth/pkg/auth
 
 require github.com/m11ano/mipt-webdev-course/backend/clients/clgrpc v0.0.0
 
@@ -34,7 +34,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/m11ano/e v1.0.2
+	github.com/m11ano/e v1.0.3
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.50.0

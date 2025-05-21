@@ -56,6 +56,126 @@ definitions:
       secret_key:
         type: string
     type: object
+  controller.GetOrderOut:
+    properties:
+      details:
+        $ref: '#/definitions/controller.GetOrderOutDetails'
+      id:
+        type: integer
+      order_sum:
+        type: number
+      products:
+        items:
+          $ref: '#/definitions/controller.GetOrderOutProduct'
+        type: array
+      secret_key:
+        type: string
+      status:
+        type: string
+    type: object
+  controller.GetOrderOutDetails:
+    properties:
+      client_email:
+        type: string
+      client_name:
+        type: string
+      client_phone:
+        type: string
+      client_surname:
+        type: string
+      delivery_address:
+        type: string
+    type: object
+  controller.GetOrderOutProduct:
+    properties:
+      id:
+        type: integer
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  controller.GetOrdersOut:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/controller.GetOrdersOutItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  controller.GetOrdersOutItem:
+    properties:
+      details:
+        $ref: '#/definitions/controller.GetOrderOutDetails'
+      id:
+        type: integer
+      order_sum:
+        type: number
+      secret_key:
+        type: string
+      status:
+        type: string
+    type: object
+  controller.SetOrderStatusIn:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  controller.UpdateOrderIn:
+    properties:
+      details:
+        $ref: '#/definitions/controller.UpdateOrderInDetails'
+      products:
+        items:
+          $ref: '#/definitions/controller.UpdateOrderInProduct'
+        minItems: 1
+        type: array
+    required:
+    - details
+    - products
+    type: object
+  controller.UpdateOrderInDetails:
+    properties:
+      client_email:
+        type: string
+      client_name:
+        maxLength: 150
+        minLength: 1
+        type: string
+      client_phone:
+        maxLength: 20
+        minLength: 1
+        type: string
+      client_surname:
+        maxLength: 150
+        minLength: 1
+        type: string
+      delivery_address:
+        maxLength: 150
+        minLength: 1
+        type: string
+    required:
+    - client_email
+    - client_name
+    - client_phone
+    - client_surname
+    - delivery_address
+    type: object
+  controller.UpdateOrderInProduct:
+    properties:
+      id:
+        minimum: 0
+        type: integer
+      price:
+        minimum: 0
+        type: number
+      quantity:
+        minimum: 1
+        type: integer
+    type: object
   middleware.ErrorJSON:
     properties:
       code:
@@ -74,6 +194,32 @@ info:
   version: "1.0"
 paths:
   /orders:
+    get:
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetOrdersOut'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Получить список заказов
+      tags:
+      - orders
     post:
       consumes:
       - application/json
@@ -95,9 +241,112 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.ErrorJSON'
+      summary: Создать заказ
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetOrderOut'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
       security:
       - BearerAuth: []
-      summary: Создать заказ
+      summary: Получить заказ по ID
+      tags:
+      - orders
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateOrderIn'
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Обновить заказ
+      tags:
+      - orders
+  /orders/{id}/{secret_key}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetOrderOut'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
+      summary: Получить заказ по ID + secret_key
+      tags:
+      - orders
+  /orders/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SetOrderStatusIn'
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Поменять статус заказу
       tags:
       - orders
 securityDefinitions:

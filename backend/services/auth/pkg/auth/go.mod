@@ -1,4 +1,4 @@
-module github.com/m11ano/mipt-webdev-course/backend/clients/auth
+module github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth
 
 go 1.23.3
 

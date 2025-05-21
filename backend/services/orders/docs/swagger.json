@@ -9,12 +9,49 @@
     "basePath": "/api/v1",
     "paths": {
         "/orders": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить список заказов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.GetOrdersOut"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            },
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -45,6 +82,173 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказ по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.GetOrderOut"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Обновить заказ",
+                "parameters": [
+                    {
+                        "description": "JSON",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateOrderIn"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Поменять статус заказу",
+                "parameters": [
+                    {
+                        "description": "JSON",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.SetOrderStatusIn"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}/{secret_key}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказ по ID + secret_key",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.GetOrderOut"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/middleware.ErrorJSON"
                         }
@@ -129,6 +333,182 @@
                 },
                 "secret_key": {
                     "type": "string"
+                }
+            }
+        },
+        "controller.GetOrderOut": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "$ref": "#/definitions/controller.GetOrderOutDetails"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "order_sum": {
+                    "type": "number"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.GetOrderOutProduct"
+                    }
+                },
+                "secret_key": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.GetOrderOutDetails": {
+            "type": "object",
+            "properties": {
+                "client_email": {
+                    "type": "string"
+                },
+                "client_name": {
+                    "type": "string"
+                },
+                "client_phone": {
+                    "type": "string"
+                },
+                "client_surname": {
+                    "type": "string"
+                },
+                "delivery_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.GetOrderOutProduct": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetOrdersOut": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.GetOrdersOutItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.GetOrdersOutItem": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "$ref": "#/definitions/controller.GetOrderOutDetails"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "order_sum": {
+                    "type": "number"
+                },
+                "secret_key": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.SetOrderStatusIn": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UpdateOrderIn": {
+            "type": "object",
+            "required": [
+                "details",
+                "products"
+            ],
+            "properties": {
+                "details": {
+                    "$ref": "#/definitions/controller.UpdateOrderInDetails"
+                },
+                "products": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/controller.UpdateOrderInProduct"
+                    }
+                }
+            }
+        },
+        "controller.UpdateOrderInDetails": {
+            "type": "object",
+            "required": [
+                "client_email",
+                "client_name",
+                "client_phone",
+                "client_surname",
+                "delivery_address"
+            ],
+            "properties": {
+                "client_email": {
+                    "type": "string"
+                },
+                "client_name": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "client_phone": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                },
+                "client_surname": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "delivery_address": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
+                }
+            }
+        },
+        "controller.UpdateOrderInProduct": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

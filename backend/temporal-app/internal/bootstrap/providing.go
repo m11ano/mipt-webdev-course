@@ -23,7 +23,7 @@ func ProvideFXLogger(config config.Config) fxevent.Logger {
 
 func ProvideGRPCClientsConns(cfg config.Config, logger *slog.Logger) (*productsgcl.ClientConn, *ordersgcl.ClientConn) {
 
-	logger = nil
+	//logger = nil
 
 	products, err := productsgcl.NewClientConn(
 		cfg.GRPC.Clients.Products.Endpoint,

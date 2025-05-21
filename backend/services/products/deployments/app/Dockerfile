@@ -3,6 +3,7 @@ FROM golang:1.23-alpine AS builder
 WORKDIR /app
 
 COPY services/products /app/services/products
+COPY services/auth/pkg/auth /app/services/auth/pkg/auth
 COPY clients /app/clients
 COPY protos /app/protos
 COPY temporal-app /app/temporal-app

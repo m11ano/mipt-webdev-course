@@ -23,6 +23,11 @@ var ErrOrderInvalidProducts = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invali
 var ErrOrderInvalidProductsQuantity = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products quantity")
 
 type OrderPartUpdateData struct {
+	ClientName      *string
+	ClientSurname   *string
+	ClientEmail     *string
+	ClientPhone     *string
+	DeliveryAddress *string
 }
 
 type OrderListSortField int
@@ -37,16 +42,22 @@ type OrderListSort struct {
 }
 
 type OrderListOptions struct {
-	IDs  *[]int64
-	Sort *[]OrderListSort
+	IDs         *[]int64
+	OnlyCreated *bool
+	Sort        *[]OrderListSort
 }
 
 type OrderCreateIn struct {
-	Details  OrderCreateInDetails
+	Details  OrderDataDetailsIn
 	Products []OrderProductIn
 }
 
-type OrderCreateInDetails struct {
+type OrderUpdateIn struct {
+	Details  OrderDataDetailsIn
+	Products []OrderProductWithPrice
+}
+
+type OrderDataDetailsIn struct {
 	ClientName      string
 	ClientSurname   string
 	ClientEmail     string
@@ -59,33 +70,33 @@ type OrderProductIn struct {
 	Quantity int32
 }
 
-type OrderProductWithPriceIn struct {
+type OrderProductWithPrice struct {
 	ID       int64
 	Quantity int32
 	Price    decimal.Decimal
 }
 
 type OrderOneFullOut struct {
-	Order *domain.Order
-}
-
-type OrderFullOut struct {
-	Order *domain.Order
+	Order    *domain.Order
+	Products []OrderProductWithPrice
 }
 
 type SetOrderCompositionIn struct {
 	OrderID  int64
-	Products []OrderProductWithPriceIn
+	Products *[]OrderProductWithPrice
+	Status   *domain.OrderStatus
 }
 
 //go:generate mockery --name=Order --output=../../tests/mocks --case=underscore
 type Order interface {
-	FindFullPagedList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*OrderFullOut, total int64, err error)
-	FindFullList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*OrderFullOut, err error)
+	FindPagedList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*domain.Order, total int64, err error)
+	FindList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*domain.Order, err error)
 	FindOneFullByID(ctx context.Context, id int64, queryParams *uctypes.QueryGetOneParams) (out *OrderOneFullOut, err error)
 	Create(ctx context.Context, input OrderCreateIn) (order *domain.Order, err error)
+	Update(ctx context.Context, orderID int64, input OrderUpdateIn) (err error)
 	SetOrderComposition(ctx context.Context, input SetOrderCompositionIn) (err error)
-	RemoveNewOrder(ctx context.Context, orderID int64) (err error)
+	RemoveOrderIfNew(ctx context.Context, orderID int64) (err error)
+	SetStatus(ctx context.Context, orderID int64, status domain.OrderStatus) (err error)
 }
 
 //go:generate mockery --name=OrderRepository --output=../../tests/mocks --case=underscore
@@ -123,38 +134,24 @@ func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.
 	return uc
 }
 
-func (uc *OrderInpl) FindFullPagedList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) ([]*OrderFullOut, int64, error) {
+func (uc *OrderInpl) FindPagedList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) ([]*domain.Order, int64, error) {
 
 	list, total, err := uc.repo.FindPagedList(ctx, listOptions, queryParams)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result := make([]*OrderFullOut, len(list))
-	for i, item := range list {
-		result[i] = &OrderFullOut{
-			Order: item,
-		}
-	}
-
-	return result, total, nil
+	return list, total, nil
 }
 
-func (uc *OrderInpl) FindFullList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) ([]*OrderFullOut, error) {
+func (uc *OrderInpl) FindList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) ([]*domain.Order, error) {
 
 	list, err := uc.repo.FindList(ctx, listOptions, queryParams)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]*OrderFullOut, len(list))
-	for i, item := range list {
-		result[i] = &OrderFullOut{
-			Order: item,
-		}
-	}
-
-	return result, nil
+	return list, nil
 }
 
 func (uc *OrderInpl) FindOneFullByID(ctx context.Context, id int64, queryParams *uctypes.QueryGetOneParams) (*OrderOneFullOut, error) {
@@ -163,8 +160,24 @@ func (uc *OrderInpl) FindOneFullByID(ctx context.Context, id int64, queryParams 
 		return nil, err
 	}
 
+	products, err := uc.orderProductUC.FindList(ctx, OrderProductListOptions{
+		OrderID: lo.ToPtr(id),
+	}, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	out := &OrderOneFullOut{
-		Order: order,
+		Order:    order,
+		Products: make([]OrderProductWithPrice, len(products)),
+	}
+
+	for i, product := range products {
+		out.Products[i] = OrderProductWithPrice{
+			ID:       product.ProductID,
+			Quantity: product.Quantity,
+			Price:    product.Price,
+		}
 	}
 
 	return out, nil
@@ -244,11 +257,7 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	flowIn := productstc.SetOrderProductsAndBlockIn{
-		OrderID:       order.ID,
-		OrderProducts: make([]productstc.OrderProductsItem, len(input.Products)),
-	}
-
+	ordersList := make([]productstc.OrderProductsItem, len(input.Products))
 	for i, item := range input.Products {
 		productItem, ok := lo.Find(products, func(product *productscl.ProductListItem) bool {
 			return product.ID == item.ID
@@ -257,20 +266,26 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 			return nil, e.ErrInternal
 		}
 
-		flowIn.OrderProducts[i] = productstc.OrderProductsItem{
+		ordersList[i] = productstc.OrderProductsItem{
 			ProductID: item.ID,
 			Quantity:  item.Quantity,
 			Price:     productItem.Price,
 		}
 	}
 
-	err = uc.productsTCl.SetOrderProductsAndBlock(ctxWithTimeout, flowIn)
+	flowIn := productstc.SetOrderProductsAndStatusIn{
+		OrderID:       order.ID,
+		OrderProducts: &ordersList,
+		OrderStatus:   lo.ToPtr(domain.OrderStatusCreated.String()),
+	}
+
+	err = uc.productsTCl.SetOrderProductsAndStatus(ctxWithTimeout, flowIn)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, e.NewErrorFrom(e.ErrServiceUnavailable)
 		}
 
-		if errors.Is(err, productstc.ErrSetOrderProductsAndBlockCantReserve) {
+		if errors.Is(err, productstc.ErrSetOrderProductsAndStatusCantReserve) {
 			return nil, ErrOrderInvalidProductsQuantity
 		}
 
@@ -278,6 +293,91 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	}
 
 	return order, nil
+}
+
+func (uc *OrderInpl) Update(ctx context.Context, orderID int64, input OrderUpdateIn) error {
+
+	productIDs := make([]int64, len(input.Products))
+	for i, item := range input.Products {
+		productIDs[i] = item.ID
+	}
+	productIDs = lo.Uniq(productIDs)
+
+	if len(productIDs) == 0 || len(productIDs) != len(input.Products) {
+		return ErrOrderInvalidProducts
+	}
+
+	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
+	if err != nil {
+		return err
+	}
+
+	if len(products) != len(productIDs) {
+		return ErrOrderInvalidProducts
+	}
+
+	for _, product := range products {
+		if !product.IsPublished {
+			return ErrOrderInvalidProducts
+		}
+	}
+
+	order, err := uc.repo.FindOneByID(ctx, orderID, nil)
+	if err != nil {
+		return err
+	}
+
+	if order.Status == domain.OrderStatusCanceled {
+		return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is canceled")
+	}
+
+	if order.Status == domain.OrderStatusFinished {
+		return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is finished")
+	}
+
+	//Запускаем воркфлоу
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	ordersList := make([]productstc.OrderProductsItem, len(input.Products))
+	for i, item := range input.Products {
+		ordersList[i] = productstc.OrderProductsItem{
+			ProductID: item.ID,
+			Quantity:  item.Quantity,
+			Price:     item.Price,
+		}
+	}
+
+	flowIn := productstc.SetOrderProductsAndStatusIn{
+		OrderID:       order.ID,
+		OrderProducts: &ordersList,
+	}
+
+	err = uc.productsTCl.SetOrderProductsAndStatus(ctxWithTimeout, flowIn)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return e.NewErrorFrom(e.ErrServiceUnavailable)
+		}
+
+		if errors.Is(err, productstc.ErrSetOrderProductsAndStatusCantReserve) {
+			return ErrOrderInvalidProductsQuantity
+		}
+
+		return err
+	}
+
+	err = uc.repo.PartUpdateByID(ctx, OrderPartUpdateData{
+		ClientName:      lo.ToPtr(input.Details.ClientName),
+		ClientSurname:   lo.ToPtr(input.Details.ClientSurname),
+		ClientEmail:     lo.ToPtr(input.Details.ClientEmail),
+		ClientPhone:     lo.ToPtr(input.Details.ClientPhone),
+		DeliveryAddress: lo.ToPtr(input.Details.DeliveryAddress),
+	}, order.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem, orderProducts []OrderProductIn) error {
@@ -292,7 +392,7 @@ func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem,
 			return item.ID == orderProduct.ID
 		})
 
-		if !isFound {
+		if !isFound || !product.IsPublished {
 			return ErrOrderInvalidProducts
 		}
 
@@ -310,6 +410,10 @@ func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem,
 
 func (uc *OrderInpl) SetOrderComposition(ctx context.Context, input SetOrderCompositionIn) error {
 
+	if input.Products == nil && input.Status == nil {
+		return e.NewErrorFrom(e.ErrBadRequest).SetMessage("products or status must be set")
+	}
+
 	err := uc.txManager.Do(ctx, func(ctx context.Context) error {
 		order, err := uc.repo.FindOneByID(ctx, input.OrderID, &uctypes.QueryGetOneParams{
 			ForUpdate: true,
@@ -322,33 +426,39 @@ func (uc *OrderInpl) SetOrderComposition(ctx context.Context, input SetOrderComp
 			return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is canceled or finished")
 		}
 
-		if order.Status == domain.OrderStatusNew {
-			order.Status = domain.OrderStatusCreated
+		if input.Status != nil {
+			err = order.SetStatus(*input.Status)
+			if err != nil {
+				return err
+			}
 		}
 
-		err = uc.orderProductUC.DeleteByOrderID(ctx, input.OrderID)
-		if err != nil {
-			return err
-		}
+		if input.Products != nil {
 
-		orderSum := decimal.Zero
-		for _, item := range input.Products {
-			orderProduct, err := domain.NewOrderProduct(input.OrderID, item.ID, item.Quantity, item.Price)
+			err = uc.orderProductUC.DeleteByOrderID(ctx, input.OrderID)
 			if err != nil {
 				return err
 			}
 
-			err = uc.orderProductUC.Create(ctx, orderProduct)
+			orderSum := decimal.Zero
+			for _, item := range *input.Products {
+				orderProduct, err := domain.NewOrderProduct(input.OrderID, item.ID, item.Quantity, item.Price)
+				if err != nil {
+					return err
+				}
+
+				err = uc.orderProductUC.Create(ctx, orderProduct)
+				if err != nil {
+					return err
+				}
+
+				orderSum = orderSum.Add(item.Price.Mul(decimal.NewFromInt(int64(item.Quantity))))
+			}
+
+			err = order.SetOrderSum(orderSum)
 			if err != nil {
 				return err
 			}
-
-			orderSum = orderSum.Add(item.Price.Mul(decimal.NewFromInt(int64(item.Quantity))))
-		}
-
-		err = order.SetOrderSum(orderSum)
-		if err != nil {
-			return err
 		}
 
 		err = uc.repo.Update(ctx, order)
@@ -365,7 +475,7 @@ func (uc *OrderInpl) SetOrderComposition(ctx context.Context, input SetOrderComp
 	return nil
 }
 
-func (uc *OrderInpl) RemoveNewOrder(ctx context.Context, orderID int64) error {
+func (uc *OrderInpl) RemoveOrderIfNew(ctx context.Context, orderID int64) error {
 
 	err := uc.txManager.Do(ctx, func(ctx context.Context) error {
 		order, err := uc.repo.FindOneByID(ctx, orderID, &uctypes.QueryGetOneParams{
@@ -393,6 +503,44 @@ func (uc *OrderInpl) RemoveNewOrder(ctx context.Context, orderID int64) error {
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *OrderInpl) SetStatus(ctx context.Context, orderID int64, status domain.OrderStatus) error {
+
+	if status == domain.OrderStatusNew {
+		return e.NewErrorFrom(e.ErrBadRequest).SetMessage("cant set status")
+	}
+
+	order, err := uc.repo.FindOneByID(ctx, orderID, &uctypes.QueryGetOneParams{
+		ForUpdate: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = order.SetStatus(status)
+	if err != nil {
+		return err
+	}
+
+	//Запускаем воркфлоу и не ждем результат
+	flowIn := productstc.SetOrderProductsAndStatusIn{
+		NotWait:     true,
+		OrderID:     order.ID,
+		OrderStatus: lo.ToPtr(order.Status.String()),
+	}
+
+	//Если заказ отменен, то отменяем списание товаров
+	if order.Status == domain.OrderStatusCanceled {
+		flowIn.OrderProducts = lo.ToPtr([]productstc.OrderProductsItem{})
+	}
+
+	err = uc.productsTCl.SetOrderProductsAndStatus(ctx, flowIn)
 	if err != nil {
 		return err
 	}

@@ -90,7 +90,7 @@ func (p *Order) SetStatus(status OrderStatus) error {
 			return ErrOrderCantSetStatus
 		}
 	case OrderStatusCanceled:
-		if p.Status != OrderStatusFinished {
+		if p.Status == OrderStatusFinished {
 			return ErrOrderCantSetStatus
 		}
 	}

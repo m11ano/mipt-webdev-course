@@ -14,9 +14,7 @@ require github.com/m11ano/mipt-webdev-course/backend/temporal-app v0.0.0
 
 replace github.com/m11ano/mipt-webdev-course/backend/temporal-app => ../../temporal-app
 
-require github.com/m11ano/mipt-webdev-course/backend/clients/auth v0.0.0
-
-replace github.com/m11ano/mipt-webdev-course/backend/clients/auth => ../../clients/auth
+replace github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth => ../auth/pkg/auth
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -31,7 +29,8 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/imperatorofdwelling/Website-backend v0.0.0-20240718064027-77c56fad23ad
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/m11ano/e v1.0.2
+	github.com/m11ano/e v1.0.3
+	github.com/m11ano/mipt-webdev-course/backend/clients/auth v0.0.0-20250521131324-52f118631ed0
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/samber/lo v1.50.0
 	github.com/shopspring/decimal v1.4.0

@@ -1,254 +1,254 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  nginx:
-    image: nginx:1.25-alpine
-    depends_on:
-      - frontend-client
-      - minio
-      - service-auth-app
-      - service-products-app
-      - service-orders-app
-      - swagger-ui
-    volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    restart: always
-    ports:
-      - "${NGINX_PORT:-80}:80"
-    networks:
-      - internal
+    nginx:
+        image: nginx:1.25-alpine
+        depends_on:
+            - frontend-client
+            - minio
+            - service-auth-app
+            - service-products-app
+            - service-orders-app
+            - swagger-ui
+        volumes:
+            - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        restart: always
+        ports:
+            - "${NGINX_PORT:-80}:80"
+        networks:
+            - internal
 
-  minio:
-    image: minio/minio:latest
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
-    restart: always
-    volumes:
-      - minio-data:/data
-    networks:
-      - internal
+    minio:
+        image: minio/minio:latest
+        environment:
+            MINIO_ROOT_USER: minioadmin
+            MINIO_ROOT_PASSWORD: minioadmin
+        command: server /data --console-address ":9001"
+        restart: always
+        volumes:
+            - minio-data:/data
+        networks:
+            - internal
 
-  frontend-client:
-    build: ./frontend/client
-    restart: on-failure
-    networks:
-      - internal
+    frontend-client:
+        build: ./frontend/client
+        restart: on-failure
+        networks:
+            - internal
 
-  swagger-ui:
-    build: ./infra/swagger-ui
-    depends_on:
-      - service-auth-app
-      - service-products-app
-      - service-orders-app
-    volumes:
-      - ./infra/swagger-ui/nginx.conf:/etc/nginx/conf.d/extra.conf:ro
-      - ./backend/services/auth/docs:/service-auth-docs
-      - ./backend/services/products/docs:/service-products-docs
-      - ./backend/services/orders/docs:/service-orders-docs
-    networks:
-      - internal
+    swagger-ui:
+        build: ./infra/swagger-ui
+        depends_on:
+            - service-auth-app
+            - service-products-app
+            - service-orders-app
+        volumes:
+            - ./infra/swagger-ui/nginx.conf:/etc/nginx/conf.d/extra.conf:ro
+            - ./backend/services/auth/docs:/service-auth-docs
+            - ./backend/services/products/docs:/service-products-docs
+            - ./backend/services/orders/docs:/service-orders-docs
+        networks:
+            - internal
 
-  service-auth-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: service-db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-    restart: always
-    volumes:
-      - auth-db-data:/var/lib/postgresql/data
-    networks:
-      - internal
+    service-auth-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: service-db
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        restart: always
+        volumes:
+            - auth-db-data:/var/lib/postgresql/data
+        networks:
+            - internal
 
-  service-auth-app:
-    build:
-      context: ./backend
-      dockerfile: services/auth/deployments/app/Dockerfile
-    environment:
-      APP_IS_PROD: true
-      DB_URI: postgres://postgres:password@service-auth-db:5432/service-db
-      SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
-      HTTP_UNDER_PROXY: true
-    depends_on:
-      - service-auth-db
-    restart: always
-    networks:
-      - internal
+    service-auth-app:
+        build:
+            context: ./backend
+            dockerfile: services/auth/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            DB_URI: postgres://postgres:password@service-auth-db:5432/service-db
+            SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
+            HTTP_UNDER_PROXY: true
+        depends_on:
+            - service-auth-db
+        restart: always
+        networks:
+            - internal
 
-  service-products-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: service-db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-    restart: always
-    volumes:
-      - products-db-data:/var/lib/postgresql/data
-    networks:
-      - internal
+    service-products-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: service-db
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        restart: always
+        volumes:
+            - products-db-data:/var/lib/postgresql/data
+        networks:
+            - internal
 
-  service-products-app:
-    build:
-      context: ./backend
-      dockerfile: services/products/deployments/app/Dockerfile
-    environment:
-      APP_IS_PROD: true
-      DB_URI: postgres://postgres:password@service-products-db:5432/service-db
-      SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
-      HTTP_UNDER_PROXY: true
-      STORAGE_S3_ENDPOINT: http://minio:9000
-      STORAGE_S3_URL: /files
-      GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
-    depends_on:
-      - temporal
-      - service-products-db
-    restart: always
-    networks:
-      - internal
+    service-products-app:
+        build:
+            context: ./backend
+            dockerfile: services/products/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            DB_URI: postgres://postgres:password@service-products-db:5432/service-db
+            SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
+            HTTP_UNDER_PROXY: true
+            STORAGE_S3_ENDPOINT: http://minio:9000
+            STORAGE_S3_URL: /files
+            GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
+        depends_on:
+            - temporal
+            - service-products-db
+        restart: always
+        networks:
+            - internal
 
-  service-products-cron:
-    build:
-      context: ./backend
-      dockerfile: services/products/deployments/cron/Dockerfile
-    environment:
-      APP_IS_PROD: true
-      DB_URI: postgres://postgres:password@service-products-db:5432/service-db
-      STORAGE_S3_ENDPOINT: http://minio:9000
-      STORAGE_S3_URL: /files
-    depends_on:
-      - service-products-db
-    restart: always
-    networks:
-      - internal
+    service-products-cron:
+        build:
+            context: ./backend
+            dockerfile: services/products/deployments/cron/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            DB_URI: postgres://postgres:password@service-products-db:5432/service-db
+            STORAGE_S3_ENDPOINT: http://minio:9000
+            STORAGE_S3_URL: /files
+        depends_on:
+            - service-products-db
+        restart: always
+        networks:
+            - internal
 
-  service-orders-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: service-db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-    restart: always
-    volumes:
-      - orders-db-data:/var/lib/postgresql/data
-    networks:
-      - internal
+    service-orders-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: service-db
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d service-db"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        restart: always
+        volumes:
+            - orders-db-data:/var/lib/postgresql/data
+        networks:
+            - internal
 
-  service-orders-app:
-    build:
-      context: ./backend
-      dockerfile: services/orders/deployments/app/Dockerfile
-    environment:
-      APP_IS_PROD: true
-      DB_URI: postgres://postgres:password@service-orders-db:5432/service-db
-      SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
-      HTTP_UNDER_PROXY: true
-      GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
-      TEMPORAL_ENDPOINT: temporal:7233
-    depends_on:
-      - temporal
-      - temporal-app
-      - service-orders-db
-    restart: always
-    networks:
-      - internal
+    service-orders-app:
+        build:
+            context: ./backend
+            dockerfile: services/orders/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            DB_URI: postgres://postgres:password@service-orders-db:5432/service-db
+            SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
+            HTTP_UNDER_PROXY: true
+            GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
+            TEMPORAL_ENDPOINT: temporal:7233
+        depends_on:
+            - temporal
+            - temporal-app
+            - service-orders-db
+        restart: always
+        networks:
+            - internal
 
-  temporal-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: temporal
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d temporal"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-    restart: always
-    volumes:
-      - temporal-db-data:/var/lib/postgresql/data
-    networks:
-      - internal
+    temporal-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: temporal
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d temporal"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        restart: always
+        volumes:
+            - temporal-db-data:/var/lib/postgresql/data
+        networks:
+            - internal
 
-  temporal:
-    image: temporalio/auto-setup:1.27
-    depends_on:
-      - temporal-db
-    environment:
-      DB: postgres12
-      DB_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PWD: password
-      POSTGRES_SEEDS: temporal-db
-      SERVICES: frontend,history,matching,worker
-      TEMPORAL_ADDRESS: temporal:7233
-      TEMPORAL_CLI_ADDRESS: temporal:7233
-      SKIP_DEFAULT_NAMESPACE_CREATION: false
-    healthcheck:
-      test: ["CMD", "tctl", "--address", "127.0.0.1:7233", "cluster", "health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: always
-    ports:
-      - "7233:7233"
-    networks:
-      - internal
+    temporal:
+        image: temporalio/auto-setup:1.27
+        depends_on:
+            - temporal-db
+        environment:
+            DB: postgres12
+            DB_PORT: 5432
+            POSTGRES_USER: postgres
+            POSTGRES_PWD: password
+            POSTGRES_SEEDS: temporal-db
+            SERVICES: frontend,history,matching,worker
+            TEMPORAL_ADDRESS: temporal:7233
+            TEMPORAL_CLI_ADDRESS: temporal:7233
+            SKIP_DEFAULT_NAMESPACE_CREATION: false
+        healthcheck:
+            test: ["CMD", "tctl", "--address", "127.0.0.1:7233", "cluster", "health"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+        restart: always
+        #ports:
+        #  - "7233:7233"
+        networks:
+            - internal
 
-  temporal-web:
-    image: temporalio/web:latest
-    depends_on:
-      - temporal
-    environment:
-      TEMPORAL_GRPC_ENDPOINT: temporal:7233
-      TEMPORAL_PERMIT_WRITE_API: "true"
-      BASE_PATH: /temporal-ui
-    ports:
-      - "8088:8088"
-    networks:
-      - internal
+    temporal-web:
+        image: temporalio/web:latest
+        depends_on:
+            - temporal
+        environment:
+            TEMPORAL_GRPC_ENDPOINT: temporal:7233
+            TEMPORAL_PERMIT_WRITE_API: "true"
+            BASE_PATH: /temporal-ui
+        ports:
+            - "8088:8088"
+        networks:
+            - internal
 
-  temporal-app:
-    build:
-      context: ./backend
-      dockerfile: temporal-app/deployments/app/Dockerfile
-    environment:
-      APP_IS_PROD: true
-      GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
-      GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
-      TEMPORAL_ENDPOINT: temporal:7233
-    depends_on:
-      - temporal
-    restart: always
-    networks:
-      - internal
+    temporal-app:
+        build:
+            context: ./backend
+            dockerfile: temporal-app/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
+            GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
+            TEMPORAL_ENDPOINT: temporal:7233
+        depends_on:
+            - temporal
+        restart: always
+        networks:
+            - internal
 
 networks:
-  internal:
+    internal:
 
 volumes:
-  minio-data:
-  auth-db-data:
-  products-db-data:
-  orders-db-data:
-  temporal-db-data:
+    minio-data:
+    auth-db-data:
+    products-db-data:
+    orders-db-data:
+    temporal-db-data:

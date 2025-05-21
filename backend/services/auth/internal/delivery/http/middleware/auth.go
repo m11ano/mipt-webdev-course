@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/m11ano/mipt-webdev-course/backend/clients/auth"
+	"github.com/m11ano/mipt-webdev-course/backend/services/auth/pkg/auth"
 )
 
 func Auth(authClient auth.Client) func(*fiber.Ctx) error {

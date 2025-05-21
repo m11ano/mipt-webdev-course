@@ -30,15 +30,15 @@ func ProdiveTemporalAndConnect(config config.Config, logger *slog.Logger, shutdo
 	return c
 }
 
-func ProdiveTemporalActivities(productsGRPC *productsgcl.ClientConn, ordersGRPC *ordersgcl.ClientConn) *activities.Controller {
-	activitiesController := activities.NewController(productsGRPC, ordersGRPC)
+func ProdiveTemporalActivities(logger *slog.Logger, productsGRPC *productsgcl.ClientConn, ordersGRPC *ordersgcl.ClientConn) *activities.Controller {
+	activitiesController := activities.NewController(logger, productsGRPC, ordersGRPC)
 	return activitiesController
 }
 
 func RegisterWorkers(tClient temporal.TemporalClient, productsActivities *activities.Controller) productsw.ProductsWorker {
 	productsWorker := productsw.NewWorker(tClient)
 
-	productsWorker.RegisterWorkflow(workflows.SetOrderProductsAndBlock)
+	productsWorker.RegisterWorkflow(workflows.SetOrderProductsAndStatus)
 
 	productsWorker.RegisterActivity(productsActivities)
 
