@@ -30,7 +30,14 @@ var App = fx.Options(
 				if err != nil {
 					return err
 				}
-				logger.Info("Connected to products grpc server")
+				logger.Info("Connection to gRPC servers established")
+
+				err = TemporalCheckHealth(ctx, tClient)
+				if err != nil {
+					logger.ErrorContext(ctx, "Cant connect to temporal")
+					return err
+				}
+				logger.Info("Connection to temporal established")
 
 				RunWorkers(logger, shutdowner, tClient, productsWorker)
 

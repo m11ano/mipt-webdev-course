@@ -9,6 +9,7 @@ import (
 )
 
 var ErrOrderCantSetStatus = e.NewErrorFrom(e.ErrBadRequest).SetMessage("cant set status")
+var ErrOrderSumLess1 = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid sum")
 
 type OrderStatus int
 
@@ -95,6 +96,16 @@ func (p *Order) SetStatus(status OrderStatus) error {
 	}
 
 	p.Status = status
+
+	return nil
+}
+
+func (p *Order) SetOrderSum(value decimal.Decimal) error {
+	if value.LessThan(decimal.Zero) {
+		return ErrOrderSumLess1
+	}
+
+	p.OrderSum = value
 
 	return nil
 }

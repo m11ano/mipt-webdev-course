@@ -446,18 +446,29 @@ func (r *Order) PartUpdateByID(ctx context.Context, updateData usecase.OrderPart
 	return nil
 }
 
-func (r *Order) DeleteByList(ctx context.Context, listOptions usecase.OrderListOptions) error {
+func (r *Order) DeleteByList(ctx context.Context, listOptions usecase.OrderListOptions, isHardRemove bool) error {
 
 	where := r.buildWhereForList(listOptions, false)
 
-	dataMap := map[string]any{
-		"deleted_at": time.Now(),
-	}
+	var query string
+	var args []any
+	var err error
 
-	query, args, err := r.qb.Update(orderTable).Where(where).SetMap(dataMap).ToSql()
-	if err != nil {
-		r.logger.ErrorContext(ctx, "building query", slog.Any("error", err))
-		return e.NewErrorFrom(e.ErrInternal).Wrap(err)
+	if isHardRemove {
+		query, args, err = r.qb.Delete(orderTable).Where(where).ToSql()
+		if err != nil {
+			r.logger.ErrorContext(ctx, "building query", slog.Any("error", err))
+			return e.NewErrorFrom(e.ErrInternal).Wrap(err)
+		}
+	} else {
+		dataMap := map[string]any{
+			"deleted_at": time.Now(),
+		}
+		query, args, err = r.qb.Update(orderTable).Where(where).SetMap(dataMap).ToSql()
+		if err != nil {
+			r.logger.ErrorContext(ctx, "building query", slog.Any("error", err))
+			return e.NewErrorFrom(e.ErrInternal).Wrap(err)
+		}
 	}
 
 	_, err = r.txc.DefaultTrOrDB(ctx, r.db).Exec(ctx, query, args...)

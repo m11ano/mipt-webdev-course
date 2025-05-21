@@ -16,6 +16,7 @@ import (
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/usecase/uctypes"
 	productstc "github.com/m11ano/mipt-webdev-course/backend/temporal-app/pkg/workers/products/client"
 	"github.com/samber/lo"
+	"github.com/shopspring/decimal"
 )
 
 var ErrOrderInvalidProducts = e.NewErrorFrom(e.ErrBadRequest).SetMessage("invalid products")
@@ -58,6 +59,12 @@ type OrderProductIn struct {
 	Quantity int32
 }
 
+type OrderProductWithPriceIn struct {
+	ID       int64
+	Quantity int32
+	Price    decimal.Decimal
+}
+
 type OrderOneFullOut struct {
 	Order *domain.Order
 }
@@ -66,12 +73,19 @@ type OrderFullOut struct {
 	Order *domain.Order
 }
 
+type SetOrderCompositionIn struct {
+	OrderID  int64
+	Products []OrderProductWithPriceIn
+}
+
 //go:generate mockery --name=Order --output=../../tests/mocks --case=underscore
 type Order interface {
 	FindFullPagedList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*OrderFullOut, total int64, err error)
 	FindFullList(ctx context.Context, listOptions OrderListOptions, queryParams *uctypes.QueryGetListParams) (out []*OrderFullOut, err error)
 	FindOneFullByID(ctx context.Context, id int64, queryParams *uctypes.QueryGetOneParams) (out *OrderOneFullOut, err error)
 	Create(ctx context.Context, input OrderCreateIn) (order *domain.Order, err error)
+	SetOrderComposition(ctx context.Context, input SetOrderCompositionIn) (err error)
+	RemoveNewOrder(ctx context.Context, orderID int64) (err error)
 }
 
 //go:generate mockery --name=OrderRepository --output=../../tests/mocks --case=underscore
@@ -83,26 +97,28 @@ type OrderRepository interface {
 	Update(ctx context.Context, item *domain.Order) (err error)
 	PartUpdateByList(ctx context.Context, updateData OrderPartUpdateData, listOptions OrderListOptions, withDeleted bool) (err error)
 	PartUpdateByID(ctx context.Context, updateData OrderPartUpdateData, id int64) (err error)
-	DeleteByList(ctx context.Context, listOptions OrderListOptions) (err error)
+	DeleteByList(ctx context.Context, listOptions OrderListOptions, isHardRemove bool) (err error)
 }
 
 type OrderInpl struct {
-	logger      *slog.Logger
-	config      config.Config
-	repo        OrderRepository
-	txManager   *manager.Manager
-	productsGCl *productsgcl.ClientConn
-	productsTCl productstc.Client
+	logger         *slog.Logger
+	config         config.Config
+	repo           OrderRepository
+	txManager      *manager.Manager
+	productsGCl    *productsgcl.ClientConn
+	productsTCl    productstc.Client
+	orderProductUC OrderProduct
 }
 
-func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository, productsGCl *productsgcl.ClientConn, productsTCl productstc.Client) *OrderInpl {
+func NewOrderInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo OrderRepository, productsGCl *productsgcl.ClientConn, productsTCl productstc.Client, orderProductUC OrderProduct) *OrderInpl {
 	uc := &OrderInpl{
-		logger:      logger,
-		config:      config,
-		txManager:   txManager,
-		repo:        repo,
-		productsGCl: productsGCl,
-		productsTCl: productsTCl,
+		logger:         logger,
+		config:         config,
+		txManager:      txManager,
+		repo:           repo,
+		productsGCl:    productsGCl,
+		productsTCl:    productsTCl,
+		orderProductUC: orderProductUC,
 	}
 	return uc
 }
@@ -166,7 +182,6 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 		return nil, ErrOrderInvalidProducts
 	}
 
-	// Сразу предварительно до создания воркфлоу проверим корректность товаров и наличие, в случае ошибки - не будем создавать заведомо провальный воркфлоу
 	products, err := uc.productsGCl.Client.GetProductsByIds(ctx, productIDs)
 	if err != nil {
 		return nil, err
@@ -189,6 +204,38 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	order.DeliveryAddress = input.Details.DeliveryAddress
 
 	err = uc.repo.Create(ctx, order)
+	if err != nil {
+		return nil, err
+	}
+
+	orderSum := decimal.Zero
+	for _, product := range input.Products {
+		productItem, ok := lo.Find(products, func(item *productscl.ProductListItem) bool {
+			return item.ID == product.ID
+		})
+		if !ok {
+			return nil, e.ErrInternal
+		}
+
+		orderProduct, err := domain.NewOrderProduct(order.ID, product.ID, product.Quantity, productItem.Price)
+		if err != nil {
+			return nil, err
+		}
+
+		err = uc.orderProductUC.Create(ctx, orderProduct)
+		if err != nil {
+			return nil, err
+		}
+
+		orderSum = orderSum.Add(productItem.Price.Mul(decimal.NewFromInt(int64(product.Quantity))))
+	}
+
+	err = order.SetOrderSum(orderSum)
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.repo.Update(ctx, order)
 	if err != nil {
 		return nil, err
 	}
@@ -219,9 +266,14 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 
 	err = uc.productsTCl.SetOrderProductsAndBlock(ctxWithTimeout, flowIn)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, e.NewErrorFrom(e.ErrServiceUnavailable)
+		}
+
 		if errors.Is(err, productstc.ErrSetOrderProductsAndBlockCantReserve) {
 			return nil, ErrOrderInvalidProductsQuantity
 		}
+
 		return nil, err
 	}
 
@@ -251,6 +303,98 @@ func (uc *OrderInpl) checkStockAvailable(products []*productscl.ProductListItem,
 
 	if len(details) > 0 {
 		return e.NewErrorFrom(ErrOrderInvalidProductsQuantity).AddDetails(details)
+	}
+
+	return nil
+}
+
+func (uc *OrderInpl) SetOrderComposition(ctx context.Context, input SetOrderCompositionIn) error {
+
+	err := uc.txManager.Do(ctx, func(ctx context.Context) error {
+		order, err := uc.repo.FindOneByID(ctx, input.OrderID, &uctypes.QueryGetOneParams{
+			ForUpdate: true,
+		})
+		if err != nil {
+			return err
+		}
+
+		if order.Status == domain.OrderStatusCanceled || order.Status == domain.OrderStatusFinished {
+			return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is canceled or finished")
+		}
+
+		if order.Status == domain.OrderStatusNew {
+			order.Status = domain.OrderStatusCreated
+		}
+
+		err = uc.orderProductUC.DeleteByOrderID(ctx, input.OrderID)
+		if err != nil {
+			return err
+		}
+
+		orderSum := decimal.Zero
+		for _, item := range input.Products {
+			orderProduct, err := domain.NewOrderProduct(input.OrderID, item.ID, item.Quantity, item.Price)
+			if err != nil {
+				return err
+			}
+
+			err = uc.orderProductUC.Create(ctx, orderProduct)
+			if err != nil {
+				return err
+			}
+
+			orderSum = orderSum.Add(item.Price.Mul(decimal.NewFromInt(int64(item.Quantity))))
+		}
+
+		err = order.SetOrderSum(orderSum)
+		if err != nil {
+			return err
+		}
+
+		err = uc.repo.Update(ctx, order)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *OrderInpl) RemoveNewOrder(ctx context.Context, orderID int64) error {
+
+	err := uc.txManager.Do(ctx, func(ctx context.Context) error {
+		order, err := uc.repo.FindOneByID(ctx, orderID, &uctypes.QueryGetOneParams{
+			ForUpdate: true,
+		})
+		if err != nil {
+			return err
+		}
+
+		if order.Status != domain.OrderStatusNew {
+			return e.NewErrorFrom(e.ErrBadRequest).SetMessage("order is not new")
+		}
+
+		err = uc.orderProductUC.DeleteByOrderID(ctx, orderID)
+		if err != nil {
+			return err
+		}
+
+		err = uc.repo.DeleteByList(ctx, OrderListOptions{
+			IDs: lo.ToPtr([]int64{orderID}),
+		}, true)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil

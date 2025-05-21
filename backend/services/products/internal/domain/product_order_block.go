@@ -35,5 +35,7 @@ func (pb *ProductOrderBlock) SetQuantity(quantity int32) error {
 	if quantity < 1 {
 		return ErrProductOrderBlockQuantityLess1
 	}
+	pb.Quantity = quantity
+
 	return nil
 }

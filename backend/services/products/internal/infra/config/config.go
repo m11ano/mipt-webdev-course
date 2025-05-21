@@ -42,7 +42,14 @@ type Config struct {
 		StartSwagger bool   `yaml:"start_swagger" env:"HTTP_START_SWAGGER" env-default:"false"`
 	} `yaml:"http"`
 	GRPC struct {
-		Port int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
+		Port    int `yaml:"port" env:"GRPC_PORT" env-default:"50051"`
+		Clients struct {
+			Orders struct {
+				Endpoint  string `yaml:"endpoint" env:"GRPC_CLIENTS_ORDERS_ENDPOINT" env-default:"127.0.0.1:8091"`
+				Retries   int    `yaml:"retries" env:"GRPC_CLIENTS_ORDERS_RETRIES" env-default:"3"`
+				TimeoutMS int    `yaml:"timeout_ms" env:"GRPC_CLIENTS_ORDERS_TIMEOUT_MS" env-default:"100"`
+			} `yaml:"orders"`
+		} `yaml:"clients"`
 	} `yaml:"grpc"`
 	Storage struct {
 		S3Endpoint  string `yaml:"s3_endpoint" env:"STORAGE_S3_ENDPOINT" env-default:""`

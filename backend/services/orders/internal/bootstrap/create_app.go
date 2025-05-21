@@ -28,6 +28,7 @@ var App = fx.Options(
 	fx.Provide(ProdiveTemporalAndConnect),
 	fx.Provide(ProvideTemporalClients),
 	// Бизнес логика
+	OrderProductModule,
 	OrderModule,
 	// Delivery
 	DeliveryHTTP,
@@ -52,7 +53,14 @@ var App = fx.Options(
 				if err != nil {
 					return err
 				}
-				logger.Info("Connected to products grpc server")
+				logger.Info("Connection to products grpc server established")
+
+				err = TemporalCheckHealth(ctx, tClient)
+				if err != nil {
+					logger.ErrorContext(ctx, "Cant connect to temporal")
+					return err
+				}
+				logger.Info("Connection to temporal established")
 
 				if config.GRPC.Port > 0 {
 					go StartGRPCServer(grpcServer, config, logger, shutdowner)

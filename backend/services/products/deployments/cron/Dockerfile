@@ -5,6 +5,7 @@ WORKDIR /app
 COPY services/products /app/services/products
 COPY clients /app/clients
 COPY protos /app/protos
+COPY temporal-app /app/temporal-app
 
 WORKDIR /app/services/products
 

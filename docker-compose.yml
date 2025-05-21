@@ -6,6 +6,7 @@ services:
             - minio
             - service-auth-app
             - service-products-app
+            - service-orders-app
             - swagger-ui
         volumes:
             - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -25,11 +26,7 @@ services:
 
     frontend-client:
         build: ./frontend/client
-        deploy:
-            restart_policy:
-                condition: on-failure
-                delay: 2s
-                window: 60s
+        restart: on-failure
         networks:
             - internal
 
@@ -38,10 +35,12 @@ services:
         depends_on:
             - service-auth-app
             - service-products-app
+            - service-orders-app
         volumes:
             - ./infra/swagger-ui/nginx.conf:/etc/nginx/conf.d/extra.conf:ro
             - ./backend/services/auth/docs:/service-auth-docs
             - ./backend/services/products/docs:/service-products-docs
+            - ./backend/services/orders/docs:/service-orders-docs
         networks:
             - internal
 
@@ -70,13 +69,8 @@ services:
             SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
             HTTP_UNDER_PROXY: true
         depends_on:
-            service-auth-db:
-                condition: service_healthy
-        deploy:
-            restart_policy:
-                condition: on-failure
-                delay: 2s
-                window: 60s
+            - service-auth-db
+        restart: on-failure
         networks:
             - internal
 
@@ -106,14 +100,11 @@ services:
             HTTP_UNDER_PROXY: true
             STORAGE_S3_ENDPOINT: http://minio:9000
             STORAGE_S3_URL: /files
+            GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
         depends_on:
-            service-products-db:
-                condition: service_healthy
-        deploy:
-            restart_policy:
-                condition: on-failure
-                delay: 2s
-                window: 60s
+            - temporal-app
+            - service-products-db
+        restart: on-failure
         networks:
             - internal
 
@@ -127,13 +118,107 @@ services:
             STORAGE_S3_ENDPOINT: http://minio:9000
             STORAGE_S3_URL: /files
         depends_on:
-            service-products-db:
-                condition: service_healthy
-        deploy:
-            restart_policy:
-                condition: on-failure
-                delay: 2s
-                window: 60s
+            - service-products-db
+        restart: on-failure
+        networks:
+            - internal
+
+    service-orders-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: service-db
+        healthcheck:
+            test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d service-db'"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        networks:
+            - internal
+
+    service-orders-app:
+        build:
+            context: ./backend
+            dockerfile: services/orders/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            DB_URI: postgres://postgres:password@service-orders-db:5432/service-db
+            SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
+            HTTP_UNDER_PROXY: true
+            GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
+            TEMPORAL_ENDPOINT: temporal:7233
+        depends_on:
+            - temporal-app
+            - service-orders-db
+        restart: on-failure
+        networks:
+            - internal
+
+    temporal-db:
+        image: postgres:16
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: temporal
+        healthcheck:
+            test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d temporal'"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
+            start_period: 10s
+        networks:
+            - internal
+
+    temporal:
+        image: temporalio/auto-setup:1.27
+        depends_on:
+            - temporal-db
+        environment:
+            DB: postgres12
+            DB_PORT: 5432
+            POSTGRES_USER: postgres
+            POSTGRES_PWD: password
+            POSTGRES_SEEDS: temporal-db
+            SERVICES: frontend,history,matching,worker
+            TEMPORAL_ADDRESS: temporal:7233
+            TEMPORAL_CLI_ADDRESS: temporal:7233
+        healthcheck:
+            test: ["CMD", "tctl", "--address", "127.0.0.1:7233", "cluster", "health"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+        ports:
+            - "7233:7233"
+        networks:
+            - internal
+
+    temporal-web:
+        image: temporalio/web:latest
+        depends_on:
+            - temporal
+        environment:
+            TEMPORAL_GRPC_ENDPOINT: temporal:7233
+            TEMPORAL_PERMIT_WRITE_API: "true"
+            TEMPORAL_WEB_PORT: 8088
+        ports:
+            - "8088:8088"
+        networks:
+            - internal
+
+    temporal-app:
+        build:
+            context: ./backend
+            dockerfile: temporal-app/deployments/app/Dockerfile
+        environment:
+            APP_IS_PROD: true
+            GRPC_CLIENTS_PRODUCTS_ENDPOINT: service-products-app:8090
+            GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
+            TEMPORAL_ENDPOINT: temporal:7233
+        depends_on:
+            - temporal
+        restart: on-failure
         networks:
             - internal
 

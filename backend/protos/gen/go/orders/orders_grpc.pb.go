@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Orders_SetOrderComposition_FullMethodName = "/orders.Orders/SetOrderComposition"
+	Orders_SetOrderComposition_FullMethodName          = "/orders.Orders/SetOrderComposition"
+	Orders_CheckOrdersExistsByProductID_FullMethodName = "/orders.Orders/CheckOrdersExistsByProductID"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -29,6 +30,7 @@ const (
 // Orders service
 type OrdersClient interface {
 	SetOrderComposition(ctx context.Context, in *SetOrderCompositionRequest, opts ...grpc.CallOption) (*SetOrderCompositionResponse, error)
+	CheckOrdersExistsByProductID(ctx context.Context, in *CheckOrdersExistsByProductIDRequest, opts ...grpc.CallOption) (*CheckOrdersExistsByProductIDResponse, error)
 }
 
 type ordersClient struct {
@@ -49,6 +51,16 @@ func (c *ordersClient) SetOrderComposition(ctx context.Context, in *SetOrderComp
 	return out, nil
 }
 
+func (c *ordersClient) CheckOrdersExistsByProductID(ctx context.Context, in *CheckOrdersExistsByProductIDRequest, opts ...grpc.CallOption) (*CheckOrdersExistsByProductIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckOrdersExistsByProductIDResponse)
+	err := c.cc.Invoke(ctx, Orders_CheckOrdersExistsByProductID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -56,6 +68,7 @@ func (c *ordersClient) SetOrderComposition(ctx context.Context, in *SetOrderComp
 // Orders service
 type OrdersServer interface {
 	SetOrderComposition(context.Context, *SetOrderCompositionRequest) (*SetOrderCompositionResponse, error)
+	CheckOrdersExistsByProductID(context.Context, *CheckOrdersExistsByProductIDRequest) (*CheckOrdersExistsByProductIDResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -68,6 +81,9 @@ type UnimplementedOrdersServer struct{}
 
 func (UnimplementedOrdersServer) SetOrderComposition(context.Context, *SetOrderCompositionRequest) (*SetOrderCompositionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetOrderComposition not implemented")
+}
+func (UnimplementedOrdersServer) CheckOrdersExistsByProductID(context.Context, *CheckOrdersExistsByProductIDRequest) (*CheckOrdersExistsByProductIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckOrdersExistsByProductID not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -108,6 +124,24 @@ func _Orders_SetOrderComposition_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_CheckOrdersExistsByProductID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckOrdersExistsByProductIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CheckOrdersExistsByProductID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CheckOrdersExistsByProductID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CheckOrdersExistsByProductID(ctx, req.(*CheckOrdersExistsByProductIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -118,6 +152,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetOrderComposition",
 			Handler:    _Orders_SetOrderComposition_Handler,
+		},
+		{
+			MethodName: "CheckOrdersExistsByProductID",
+			Handler:    _Orders_CheckOrdersExistsByProductID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

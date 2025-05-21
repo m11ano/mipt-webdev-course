@@ -12,6 +12,7 @@ func (c *ClientImpl) SetOrderComposition(ctx context.Context, in SetOrderComposi
 
 	_, err := c.api.SetOrderComposition(ctx, &ordersv1.SetOrderCompositionRequest{
 		OrderId: in.OrderID,
+		IsOk:    in.IsOk,
 		Items: lo.Map(in.OrderProducts, func(item OrderCompositionItem, _ int) *ordersv1.OrderProduct {
 			return &ordersv1.OrderProduct{
 				ProductId: item.ProductID,

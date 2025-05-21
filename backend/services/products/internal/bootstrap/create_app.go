@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	ordersgcl "github.com/m11ano/mipt-webdev-course/backend/services/products/internal/clients/grpc/orders"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/db/migrations"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/storage"
@@ -27,6 +28,7 @@ var App = fx.Options(
 	fx.Provide(ProvidePGXPoolWithTxMgr),
 	fx.Provide(ProvideS3Client),
 	fx.Provide(ProvideStorageClient),
+	fx.Provide(ProvideGRPCClientsConns),
 	// Бизнес логика
 	FileModule,
 	ProductModule,
@@ -36,7 +38,7 @@ var App = fx.Options(
 	DeliveryHTTP,
 	DeliveryGRPC,
 	// Start && Stop invoke
-	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, s3Client *s3.Client, storageClient storage.Client, grpcServer *grpc.Server) {
+	fx.Invoke(func(lc fx.Lifecycle, shutdowner fx.Shutdowner, logger *slog.Logger, config config.Config, dbpool *pgxpool.Pool, fiberApp *fiber.App, s3Client *s3.Client, storageClient storage.Client, grpcServer *grpc.Server, ordersGCl *ordersgcl.ClientConn) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				err := Pgxv5TestConnection(ctx, dbpool, logger, config.DB.MaxAttempt, config.DB.AttemptSleepSeconds)
@@ -61,6 +63,12 @@ var App = fx.Options(
 					return err
 				}
 				logger.Info("Storage buckets created")
+
+				err = ConnectToGRPCServer(ctx, ordersGCl.Conn)
+				if err != nil {
+					return err
+				}
+				logger.Info("Connection to orders grpc server established")
 
 				if config.GRPC.Port > 0 {
 					go StartGRPCServer(grpcServer, config, logger, shutdowner)

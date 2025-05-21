@@ -10,6 +10,7 @@ mkdir -p "$TARGET"
 
 cp /service-auth-docs/swagger.json /usr/share/nginx/html/swagger/service-auth.json
 cp /service-products-docs/swagger.json /usr/share/nginx/html/swagger/service-products.json
+cp /service-orders-docs/swagger.json /usr/share/nginx/html/swagger/service-orders.json
 
 cat <<EOF > /usr/share/nginx/html/swagger/swagger-config.yaml
 urls:
@@ -17,6 +18,8 @@ urls:
     name: "Service AUTH"
   - url: "/api/swagger/swagger/service-products.json"
     name: "Service PRODUCTS"
+  - url: "/api/swagger/swagger/service-orders.json"
+    name: "Service ORDERS"
 EOF
 
 export CONFIG_URL=/api/swagger/swagger/swagger-config.yaml

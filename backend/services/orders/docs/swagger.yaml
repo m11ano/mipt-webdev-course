@@ -1,122 +1,59 @@
 basePath: /api/v1
 definitions:
-  controller.CreateProductIn:
+  controller.CreateOrderIn:
     properties:
-      full_description:
-        type: string
-      image_preview_file_id:
-        type: string
-      is_published:
-        type: boolean
-      name:
-        maxLength: 150
-        minLength: 1
-        type: string
-      price:
-        minimum: 0
-        type: number
-      slider_files_ids:
+      details:
+        $ref: '#/definitions/controller.CreateOrderInDetails'
+      products:
         items:
-          type: string
-        minItems: 1
-        type: array
-      stock_available:
-        minimum: 0
-        type: integer
-    required:
-    - image_preview_file_id
-    - name
-    type: object
-  controller.CreateProductOut:
-    properties:
-      id:
-        type: integer
-    type: object
-  controller.GetProductOut:
-    properties:
-      full_description:
-        type: string
-      id:
-        type: integer
-      image_preview:
-        type: string
-      is_published:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
-      slider:
-        items:
-          type: string
-        type: array
-      stock_available:
-        type: integer
-    type: object
-  controller.GetProductsOut:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/controller.GetProductsOutItem'
-        type: array
-      total:
-        type: integer
-    type: object
-  controller.GetProductsOutItem:
-    properties:
-      id:
-        type: integer
-      image_preview:
-        type: string
-      name:
-        type: string
-      price:
-        type: number
-      stock_available:
-        type: integer
-    type: object
-  controller.UpdateProductIn:
-    properties:
-      full_description:
-        type: string
-      image_preview_file_id:
-        type: string
-      is_published:
-        type: boolean
-      name:
-        maxLength: 150
-        minLength: 1
-        type: string
-      price:
-        minimum: 0
-        type: number
-      slider_files_ids:
-        items:
-          type: string
+          $ref: '#/definitions/controller.CreateOrderInProduct'
         minItems: 1
         type: array
     required:
-    - image_preview_file_id
-    - name
+    - details
+    - products
     type: object
-  controller.UpdateProductStockIn:
+  controller.CreateOrderInDetails:
     properties:
-      operation:
-        enum:
-        - increase
-        - decrease
+      client_email:
         type: string
-      value:
+      client_name:
+        maxLength: 150
+        minLength: 1
+        type: string
+      client_phone:
+        maxLength: 20
+        minLength: 1
+        type: string
+      client_surname:
+        maxLength: 150
+        minLength: 1
+        type: string
+      delivery_address:
+        maxLength: 150
+        minLength: 1
+        type: string
+    required:
+    - client_email
+    - client_name
+    - client_phone
+    - client_surname
+    - delivery_address
+    type: object
+  controller.CreateOrderInProduct:
+    properties:
+      id:
+        minimum: 0
+        type: integer
+      quantity:
         minimum: 1
         type: integer
-    required:
-    - operation
     type: object
-  controller.UploadImageOut:
+  controller.CreateOrderOut:
     properties:
       id:
-        type: string
-      url:
+        type: integer
+      secret_key:
         type: string
     type: object
   middleware.ErrorJSON:
@@ -132,39 +69,11 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API документация для products
-  title: Products API
+  description: API документация для orders
+  title: Orders API
   version: "1.0"
 paths:
-  /products:
-    get:
-      parameters:
-      - description: Limit
-        in: query
-        name: limit
-        type: integer
-      - description: Offset
-        in: query
-        name: offset
-        type: integer
-      - description: IDs of products
-        in: query
-        name: ids
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.GetProductsOut'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      summary: Получить список продуктов
-      tags:
-      - products
+  /orders:
     post:
       consumes:
       - application/json
@@ -174,154 +83,23 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controller.CreateProductIn'
+          $ref: '#/definitions/controller.CreateOrderIn'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controller.CreateProductOut'
+            $ref: '#/definitions/controller.CreateOrderOut'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.ErrorJSON'
       security:
       - BearerAuth: []
-      summary: Создать продукт
+      summary: Создать заказ
       tags:
-      - products
-  /products/{id}:
-    delete:
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      security:
-      - BearerAuth: []
-      summary: Удалить продукт
-      tags:
-      - products
-    get:
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.GetProductOut'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      summary: Получить продукт по ID
-      tags:
-      - products
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: JSON
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controller.UpdateProductIn'
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      security:
-      - BearerAuth: []
-      summary: Редактировать продукт
-      tags:
-      - products
-  /products/{id}/stock:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: JSON
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controller.UpdateProductStockIn'
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      security:
-      - BearerAuth: []
-      summary: Изменить остаток товара на складе
-      tags:
-      - products
-  /products/image:
-    post:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - description: Файл изображения
-        in: formData
-        name: file
-        required: true
-        type: file
-      - description: 'Тип изображения, enum: preview, slider'
-        in: formData
-        name: image_type
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.UploadImageOut'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.ErrorJSON'
-      security:
-      - BearerAuth: []
-      summary: Загрузка изображения
-      tags:
-      - products
+      - orders
 securityDefinitions:
   BearerAuth:
     in: header

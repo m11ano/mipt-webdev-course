@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"log/slog"
 
 	ordersgcl "github.com/m11ano/mipt-webdev-course/backend/temporal-app/internal/clients/grpc/orders"
@@ -17,7 +18,7 @@ import (
 )
 
 func ProdiveTemporalAndConnect(config config.Config, logger *slog.Logger, shutdowner fx.Shutdowner) temporal.TemporalClient {
-	c, err := tclient.Dial(tclient.Options{
+	c, err := tclient.NewLazyClient(tclient.Options{
 		HostPort: config.Temporal.Endpoint,
 		Logger:   logger.WithGroup("temporal"),
 	})
@@ -52,4 +53,13 @@ func RunWorkers(logger *slog.Logger, shutdowner fx.Shutdowner, tClient tclient.C
 			shutdowner.Shutdown()
 		}
 	}()
+}
+
+func TemporalCheckHealth(ctx context.Context, tClient tclient.Client) error {
+	_, err := tClient.CheckHealth(ctx, &tclient.CheckHealthRequest{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

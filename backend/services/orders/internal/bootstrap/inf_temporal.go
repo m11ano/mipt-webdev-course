@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/m11ano/mipt-webdev-course/backend/services/orders/internal/infra/config"
@@ -20,4 +21,13 @@ func ProdiveTemporalAndConnect(config config.Config, logger *slog.Logger, shutdo
 	}
 
 	return c
+}
+
+func TemporalCheckHealth(ctx context.Context, tClient tclient.Client) error {
+	_, err := tClient.CheckHealth(ctx, &tclient.CheckHealthRequest{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

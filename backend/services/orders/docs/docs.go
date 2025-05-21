@@ -15,50 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/products": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Получить список продуктов",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "IDs of products",
-                        "name": "ids",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.GetProductsOut"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            },
+        "/orders": {
             "post": {
                 "security": [
                     {
@@ -72,9 +29,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "orders"
                 ],
-                "summary": "Создать продукт",
+                "summary": "Создать заказ",
                 "parameters": [
                     {
                         "description": "JSON",
@@ -82,7 +39,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.CreateProductIn"
+                            "$ref": "#/definitions/controller.CreateOrderIn"
                         }
                     }
                 ],
@@ -90,215 +47,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controller.CreateProductOut"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            }
-        },
-        "/products/image": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Загрузка изображения",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Файл изображения",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Тип изображения, enum: preview, slider",
-                        "name": "image_type",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.UploadImageOut"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            }
-        },
-        "/products/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Получить продукт по ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.GetProductOut"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Редактировать продукт",
-                "parameters": [
-                    {
-                        "description": "JSON",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProductIn"
-                        }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Удалить продукт",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/middleware.ErrorJSON"
-                        }
-                    }
-                }
-            }
-        },
-        "/products/{id}/stock": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Изменить остаток товара на складе",
-                "parameters": [
-                    {
-                        "description": "JSON",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProductStockIn"
-                        }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controller.CreateOrderOut"
                         }
                     },
                     "400": {
@@ -312,178 +61,80 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controller.CreateProductIn": {
+        "controller.CreateOrderIn": {
             "type": "object",
             "required": [
-                "image_preview_file_id",
-                "name"
+                "details",
+                "products"
             ],
             "properties": {
-                "full_description": {
+                "details": {
+                    "$ref": "#/definitions/controller.CreateOrderInDetails"
+                },
+                "products": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/controller.CreateOrderInProduct"
+                    }
+                }
+            }
+        },
+        "controller.CreateOrderInDetails": {
+            "type": "object",
+            "required": [
+                "client_email",
+                "client_name",
+                "client_phone",
+                "client_surname",
+                "delivery_address"
+            ],
+            "properties": {
+                "client_email": {
                     "type": "string"
                 },
-                "image_preview_file_id": {
-                    "type": "string"
-                },
-                "is_published": {
-                    "type": "boolean"
-                },
-                "name": {
+                "client_name": {
                     "type": "string",
                     "maxLength": 150,
                     "minLength": 1
                 },
-                "price": {
-                    "type": "number",
-                    "minimum": 0
+                "client_phone": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
                 },
-                "slider_files_ids": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "type": "string"
-                    }
+                "client_surname": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
                 },
-                "stock_available": {
+                "delivery_address": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 1
+                }
+            }
+        },
+        "controller.CreateOrderInProduct": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "integer",
                     "minimum": 0
-                }
-            }
-        },
-        "controller.CreateProductOut": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "controller.GetProductOut": {
-            "type": "object",
-            "properties": {
-                "full_description": {
-                    "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "image_preview": {
-                    "type": "string"
-                },
-                "is_published": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "slider": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "stock_available": {
-                    "type": "integer"
-                }
-            }
-        },
-        "controller.GetProductsOut": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/controller.GetProductsOutItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "controller.GetProductsOutItem": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "image_preview": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "stock_available": {
-                    "type": "integer"
-                }
-            }
-        },
-        "controller.UpdateProductIn": {
-            "type": "object",
-            "required": [
-                "image_preview_file_id",
-                "name"
-            ],
-            "properties": {
-                "full_description": {
-                    "type": "string"
-                },
-                "image_preview_file_id": {
-                    "type": "string"
-                },
-                "is_published": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 150,
-                    "minLength": 1
-                },
-                "price": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "slider_files_ids": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "controller.UpdateProductStockIn": {
-            "type": "object",
-            "required": [
-                "operation"
-            ],
-            "properties": {
-                "operation": {
-                    "type": "string",
-                    "enum": [
-                        "increase",
-                        "decrease"
-                    ]
-                },
-                "value": {
+                "quantity": {
                     "type": "integer",
                     "minimum": 1
                 }
             }
         },
-        "controller.UploadImageOut": {
+        "controller.CreateOrderOut": {
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
-                "url": {
+                "secret_key": {
                     "type": "string"
                 }
             }
@@ -521,8 +172,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Products API",
-	Description:      "API документация для products",
+	Title:            "Orders API",
+	Description:      "API документация для orders",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -8,6 +8,7 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/google/uuid"
 	"github.com/m11ano/e"
+	ordersgcl "github.com/m11ano/mipt-webdev-course/backend/services/products/internal/clients/grpc/orders"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/domain"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/infra/config"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/usecase/uctypes"
@@ -78,6 +79,8 @@ type Product interface {
 	Update(ctx context.Context, id int64, input ProductUpdateIn) (product *domain.Product, slider []*domain.ProductSliderImage, err error)
 	ChangeStock(ctx context.Context, id int64, value int32, isIncrease bool) (err error)
 	Delete(ctx context.Context, id int64) (err error)
+	SetOrderBlock(ctx context.Context, orderID int64, composition []ProductOrderBlockComposition) (err error)
+	ApplyOrderBlock(ctx context.Context, orderID int64) (err error)
 }
 
 //go:generate mockery --name=ProductRepository --output=../../tests/mocks --case=underscore
@@ -100,9 +103,10 @@ type ProductInpl struct {
 	fileUC               File
 	productSliderImageUC ProductSliderImage
 	productOrderBlockUC  ProductOrderBlock
+	ordersGCL            *ordersgcl.ClientConn
 }
 
-func NewProductInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo ProductRepository, filesUC File, productSliderImageUC ProductSliderImage, productOrderBlockUC ProductOrderBlock) *ProductInpl {
+func NewProductInpl(logger *slog.Logger, config config.Config, txManager *manager.Manager, repo ProductRepository, filesUC File, productSliderImageUC ProductSliderImage, productOrderBlockUC ProductOrderBlock, ordersGCL *ordersgcl.ClientConn) *ProductInpl {
 	uc := &ProductInpl{
 		logger:               logger,
 		config:               config,
@@ -111,6 +115,7 @@ func NewProductInpl(logger *slog.Logger, config config.Config, txManager *manage
 		fileUC:               filesUC,
 		productSliderImageUC: productSliderImageUC,
 		productOrderBlockUC:  productOrderBlockUC,
+		ordersGCL:            ordersGCL,
 	}
 	return uc
 }
@@ -486,7 +491,15 @@ func (uc *ProductInpl) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-	// 2) TODO: до транзакции сделать проверку наличия заказов по товару, чтобы зря не создавать транзакцию и не блокировать товар, если он уже ранее был заказан
+	// 2) проверка наличия заказов по товару, чтобы зря не создавать транзакцию и не блокировать товар, если он уже ранее был заказан
+	exists, err := uc.ordersGCL.Client.CheckOrdersExistsByProductID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return ErrProductAlreadyHasOrders
+	}
 
 	// 3) создаем транзакцию
 	err = uc.txManager.Do(ctx, func(ctx context.Context) error {
@@ -509,7 +522,15 @@ func (uc *ProductInpl) Delete(ctx context.Context, id int64) error {
 			return ErrProductAlreadyHasOrders
 		}
 
-		// 6) TODO: сделать проверку наличия заказов по товару
+		// 6) Повторная проверка наличия заказов по товару
+		exists, err := uc.ordersGCL.Client.CheckOrdersExistsByProductID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			return ErrProductAlreadyHasOrders
+		}
 
 		// 7) удаляем товар
 		err = uc.repo.DeleteByList(ctx, ProductListOptions{
@@ -525,5 +546,129 @@ func (uc *ProductInpl) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
+	return nil
+}
+
+func (uc *ProductInpl) SetOrderBlock(ctx context.Context, orderID int64, composition []ProductOrderBlockComposition) error {
+
+	compositionProductsIDs := make([]int64, 0, len(composition))
+	for _, item := range composition {
+		compositionProductsIDs = append(compositionProductsIDs, item.ProductID)
+	}
+	compositionProductsIDs = lo.Uniq(compositionProductsIDs)
+
+	err := uc.txManager.Do(ctx, func(ctx context.Context) error {
+		curOrderBlocks, err := uc.productOrderBlockUC.FindList(ctx, ProductOrderBlockListOptions{
+			OrderID: &orderID,
+		}, &uctypes.QueryGetListParams{
+			ForUpdate: true,
+		})
+		if err != nil {
+			return err
+		}
+
+		//Возвращаем остаток от текущей брони если есть
+		if len(curOrderBlocks) > 0 {
+			curOrderProductsIDs := make([]int64, 0, len(curOrderBlocks))
+			for _, block := range curOrderBlocks {
+				curOrderProductsIDs = append(curOrderProductsIDs, block.ProductID)
+			}
+
+			curOrderProducts, err := uc.repo.FindList(ctx, ProductListOptions{
+				IDs: lo.ToPtr(curOrderProductsIDs),
+			}, &uctypes.QueryGetListParams{
+				ForUpdate: true,
+			})
+			if err != nil {
+				return err
+			}
+
+			for i, product := range curOrderProducts {
+				blockForProduct, ok := lo.Find(curOrderBlocks, func(item *domain.ProductOrderBlock) bool {
+					return item.ProductID == product.ID
+				})
+
+				var curBlockQuantity int32
+
+				if ok {
+					curBlockQuantity = blockForProduct.Quantity
+				}
+
+				err = curOrderProducts[i].SetStockAvailable(product.StockAvailable + curBlockQuantity)
+				if err != nil {
+					return err
+				}
+
+				err = uc.repo.Update(ctx, curOrderProducts[i])
+				if err != nil {
+					return err
+				}
+			}
+
+			err = uc.productOrderBlockUC.ClearBlocksForOrder(ctx, orderID)
+			if err != nil {
+				return err
+			}
+		}
+
+		//Создаем новую бронь, если она не пустая
+		if len(compositionProductsIDs) > 0 {
+
+			compositionProducts, err := uc.repo.FindList(ctx, ProductListOptions{
+				IDs: lo.ToPtr(compositionProductsIDs),
+			}, &uctypes.QueryGetListParams{
+				ForUpdate: true,
+			})
+			if err != nil {
+				return err
+			}
+
+			if len(compositionProducts) != len(compositionProductsIDs) {
+				return e.NewErrorFrom(e.ErrBadRequest).SetMessage("products not found")
+			}
+
+			for i, product := range compositionProducts {
+				compositionProduct, ok := lo.Find(composition, func(item ProductOrderBlockComposition) bool {
+					return item.ProductID == product.ID
+				})
+
+				var compositionProductBlockQuantity int32
+
+				if ok {
+					compositionProductBlockQuantity = compositionProduct.Quantity
+				}
+
+				err = compositionProducts[i].SetStockAvailable(product.StockAvailable - compositionProductBlockQuantity)
+				if err != nil {
+					return err
+				}
+
+				err = uc.repo.Update(ctx, compositionProducts[i])
+				if err != nil {
+					return err
+				}
+
+				block, err := domain.NewProductOrderBlock(product.ID, orderID, compositionProductBlockQuantity)
+				if err != nil {
+					return err
+				}
+
+				err = uc.productOrderBlockUC.Create(ctx, block)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *ProductInpl) ApplyOrderBlock(ctx context.Context, orderID int64) error {
 	return nil
 }

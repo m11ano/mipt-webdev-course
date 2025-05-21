@@ -177,6 +177,94 @@ func (*SetOrderCompositionResponse) Descriptor() ([]byte, []int) {
 	return file_orders_orders_proto_rawDescGZIP(), []int{2}
 }
 
+type CheckOrdersExistsByProductIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckOrdersExistsByProductIDRequest) Reset() {
+	*x = CheckOrdersExistsByProductIDRequest{}
+	mi := &file_orders_orders_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckOrdersExistsByProductIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckOrdersExistsByProductIDRequest) ProtoMessage() {}
+
+func (x *CheckOrdersExistsByProductIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_orders_orders_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckOrdersExistsByProductIDRequest.ProtoReflect.Descriptor instead.
+func (*CheckOrdersExistsByProductIDRequest) Descriptor() ([]byte, []int) {
+	return file_orders_orders_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CheckOrdersExistsByProductIDRequest) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+type CheckOrdersExistsByProductIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckOrdersExistsByProductIDResponse) Reset() {
+	*x = CheckOrdersExistsByProductIDResponse{}
+	mi := &file_orders_orders_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckOrdersExistsByProductIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckOrdersExistsByProductIDResponse) ProtoMessage() {}
+
+func (x *CheckOrdersExistsByProductIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_orders_orders_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckOrdersExistsByProductIDResponse.ProtoReflect.Descriptor instead.
+func (*CheckOrdersExistsByProductIDResponse) Descriptor() ([]byte, []int) {
+	return file_orders_orders_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CheckOrdersExistsByProductIDResponse) GetExists() bool {
+	if x != nil {
+		return x.Exists
+	}
+	return false
+}
+
 var File_orders_orders_proto protoreflect.FileDescriptor
 
 const file_orders_orders_proto_rawDesc = "" +
@@ -191,9 +279,15 @@ const file_orders_orders_proto_rawDesc = "" +
 	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x13\n" +
 	"\x05is_ok\x18\x02 \x01(\bR\x04isOk\x12*\n" +
 	"\x05items\x18\x03 \x03(\v2\x14.orders.OrderProductR\x05items\"\x1d\n" +
-	"\x1bSetOrderCompositionResponse2h\n" +
+	"\x1bSetOrderCompositionResponse\"D\n" +
+	"#CheckOrdersExistsByProductIDRequest\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\x03R\tproductId\">\n" +
+	"$CheckOrdersExistsByProductIDResponse\x12\x16\n" +
+	"\x06exists\x18\x01 \x01(\bR\x06exists2\xe3\x01\n" +
 	"\x06Orders\x12^\n" +
-	"\x13SetOrderComposition\x12\".orders.SetOrderCompositionRequest\x1a#.orders.SetOrderCompositionResponseB.Z,m11ano.mipt_webdev_course.orders.v1;ordersv1b\x06proto3"
+	"\x13SetOrderComposition\x12\".orders.SetOrderCompositionRequest\x1a#.orders.SetOrderCompositionResponse\x12y\n" +
+	"\x1cCheckOrdersExistsByProductID\x12+.orders.CheckOrdersExistsByProductIDRequest\x1a,.orders.CheckOrdersExistsByProductIDResponseB.Z,m11ano.mipt_webdev_course.orders.v1;ordersv1b\x06proto3"
 
 var (
 	file_orders_orders_proto_rawDescOnce sync.Once
@@ -207,18 +301,22 @@ func file_orders_orders_proto_rawDescGZIP() []byte {
 	return file_orders_orders_proto_rawDescData
 }
 
-var file_orders_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_orders_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_orders_orders_proto_goTypes = []any{
-	(*OrderProduct)(nil),                // 0: orders.OrderProduct
-	(*SetOrderCompositionRequest)(nil),  // 1: orders.SetOrderCompositionRequest
-	(*SetOrderCompositionResponse)(nil), // 2: orders.SetOrderCompositionResponse
+	(*OrderProduct)(nil),                         // 0: orders.OrderProduct
+	(*SetOrderCompositionRequest)(nil),           // 1: orders.SetOrderCompositionRequest
+	(*SetOrderCompositionResponse)(nil),          // 2: orders.SetOrderCompositionResponse
+	(*CheckOrdersExistsByProductIDRequest)(nil),  // 3: orders.CheckOrdersExistsByProductIDRequest
+	(*CheckOrdersExistsByProductIDResponse)(nil), // 4: orders.CheckOrdersExistsByProductIDResponse
 }
 var file_orders_orders_proto_depIdxs = []int32{
 	0, // 0: orders.SetOrderCompositionRequest.items:type_name -> orders.OrderProduct
 	1, // 1: orders.Orders.SetOrderComposition:input_type -> orders.SetOrderCompositionRequest
-	2, // 2: orders.Orders.SetOrderComposition:output_type -> orders.SetOrderCompositionResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	3, // 2: orders.Orders.CheckOrdersExistsByProductID:input_type -> orders.CheckOrdersExistsByProductIDRequest
+	2, // 3: orders.Orders.SetOrderComposition:output_type -> orders.SetOrderCompositionResponse
+	4, // 4: orders.Orders.CheckOrdersExistsByProductID:output_type -> orders.CheckOrdersExistsByProductIDResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -235,7 +333,7 @@ func file_orders_orders_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_orders_orders_proto_rawDesc), len(file_orders_orders_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
