@@ -42,5 +42,7 @@ func NewHTTPFiber(httpCfg HTTPConfig, logger *slog.Logger) *fiber.App {
 		app.Use(middleware.Logger(logger))
 	}
 
+	app.Use(middleware.Cors())
+
 	return app
 }
