@@ -10,10 +10,11 @@ import (
 const defaultBodyLimit = 10 * 1024 * 1024
 
 type HTTPConfig struct {
-	UnderProxy bool
-	UseTraceID bool
-	UseLogger  bool
-	BodyLimit  int
+	UnderProxy       bool
+	UseTraceID       bool
+	UseLogger        bool
+	BodyLimit        int
+	CorsAllowOrigins []string
 }
 
 func NewHTTPFiber(httpCfg HTTPConfig, logger *slog.Logger) *fiber.App {
@@ -42,7 +43,9 @@ func NewHTTPFiber(httpCfg HTTPConfig, logger *slog.Logger) *fiber.App {
 		app.Use(middleware.Logger(logger))
 	}
 
-	app.Use(middleware.Cors())
+	if len(httpCfg.CorsAllowOrigins) > 0 {
+		app.Use(middleware.Cors(httpCfg.CorsAllowOrigins))
+	}
 
 	return app
 }

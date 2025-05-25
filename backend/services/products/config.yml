@@ -35,6 +35,9 @@ http:
     stop_timeout: 5
     under_proxy: false
     start_swagger: true
+    cors:
+        - "http://127.0.0.1:3000"
+        - "http://127.0.0.1:3001"
 
 grpc:
     port: 8090

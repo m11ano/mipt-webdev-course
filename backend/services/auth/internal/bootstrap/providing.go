@@ -26,12 +26,13 @@ func ProvidePGXPoolWithTxMgr(pgxpool *pgxpool.Pool) (*manager.Manager, *trmpgx.C
 	return txmngr.New(pgxpool)
 }
 
-func ProvideFiberApp(config config.Config, logger *slog.Logger) *fiber.App {
+func ProvideFiberApp(cfg config.Config, logger *slog.Logger) *fiber.App {
 	fiberApp := NewHTTPFiber(HTTPConfig{
-		UnderProxy: config.HTTP.UnderProxy,
-		UseTraceID: true,
-		UseLogger:  true,
-		BodyLimit:  -1,
+		UnderProxy:       cfg.HTTP.UnderProxy,
+		UseTraceID:       true,
+		UseLogger:        true,
+		BodyLimit:        -1,
+		CorsAllowOrigins: cfg.HTTP.Cors,
 	}, logger)
 	return fiberApp
 }

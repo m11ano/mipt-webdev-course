@@ -39,12 +39,13 @@ func ProvideS3Client(cfg config.Config) *s3.Client {
 	return s3d.NewS3Client(cfg.Storage.S3Endpoint, cfg.Storage.S3Region, cfg.Storage.S3AccessKey, cfg.Storage.S3SecretKey)
 }
 
-func ProvideFiberApp(config config.Config, logger *slog.Logger) *fiber.App {
+func ProvideFiberApp(cfg config.Config, logger *slog.Logger) *fiber.App {
 	fiberApp := NewHTTPFiber(HTTPConfig{
-		UnderProxy: config.HTTP.UnderProxy,
-		UseTraceID: true,
-		UseLogger:  true,
-		BodyLimit:  -1,
+		UnderProxy:       cfg.HTTP.UnderProxy,
+		UseTraceID:       true,
+		UseLogger:        true,
+		BodyLimit:        -1,
+		CorsAllowOrigins: cfg.HTTP.Cors,
 	}, logger)
 	return fiberApp
 }
