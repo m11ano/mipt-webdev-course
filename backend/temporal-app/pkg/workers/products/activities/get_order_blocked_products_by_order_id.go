@@ -16,5 +16,7 @@ func (c *Controller) GetOrderBlockedProductsByOrderID(ctx context.Context, order
 		c.logger.Error("failed to get order blocked products by order id", slog.Any("error", err.Error()))
 	}
 
+	c.logger.Info("get order blocked products by order id", slog.Int64("order_id", orderID))
+
 	return result, e2temperr.ErrToTempErr(err)
 }

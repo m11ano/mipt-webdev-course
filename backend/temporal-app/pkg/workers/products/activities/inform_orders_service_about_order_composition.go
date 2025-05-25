@@ -48,5 +48,7 @@ func (c *Controller) InformOrdersServiceAboutOrderComposition(ctx context.Contex
 		return e2temperr.ErrToTempErr(err)
 	}
 
+	c.logger.Info("inform orders service about order composition", slog.Int64("order_id", input.OrderID))
+
 	return nil
 }

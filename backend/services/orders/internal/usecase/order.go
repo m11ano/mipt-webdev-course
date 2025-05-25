@@ -254,7 +254,7 @@ func (uc *OrderInpl) Create(ctx context.Context, input OrderCreateIn) (*domain.O
 	}
 
 	//Запускаем воркфлоу
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	ordersList := make([]productstc.OrderProductsItem, len(input.Products))
@@ -336,7 +336,7 @@ func (uc *OrderInpl) Update(ctx context.Context, orderID int64, input OrderUpdat
 	}
 
 	//Запускаем воркфлоу
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	ordersList := make([]productstc.OrderProductsItem, len(input.Products))

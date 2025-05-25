@@ -38,6 +38,8 @@ services:
         restart: on-failure
         networks:
             - internal
+        environment:
+            - NUXT_PUBLIC_API_BASE=/api/v1
 
     swagger-ui:
         build: ./infra/swagger-ui
@@ -114,7 +116,7 @@ services:
             SECRETS_JWT: T9vq75NyopB05w2iO8Hp4iduv9xHD5woYWgfEDZmpKOOd4CDC8
             HTTP_UNDER_PROXY: true
             STORAGE_S3_ENDPOINT: http://minio:9000
-            STORAGE_S3_URL: /files
+            STORAGE_S3_URL: http://localhost/files
             GRPC_CLIENTS_ORDERS_ENDPOINT: service-orders-app:8091
         depends_on:
             - temporal
@@ -207,6 +209,9 @@ services:
             TEMPORAL_ADDRESS: temporal:7233
             TEMPORAL_CLI_ADDRESS: temporal:7233
             SKIP_DEFAULT_NAMESPACE_CREATION: false
+            DYNAMIC_CONFIG_FILE_PATH: /etc/temporal/config/dynamicconfig/config-dynamic.yaml
+        volumes:
+            - ./infra/temporal/config-dynamic.yaml:/etc/temporal/config/dynamicconfig/config-dynamic.yaml:ro
         healthcheck:
             test: ["CMD", "tctl", "--address", "127.0.0.1:7233", "cluster", "health"]
             interval: 10s

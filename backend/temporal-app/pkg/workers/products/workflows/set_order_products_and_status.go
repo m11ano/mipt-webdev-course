@@ -38,17 +38,18 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 		}, nil
 	}
 
-	onceTryOpts := workflow.ActivityOptions{
-		StartToCloseTimeout: time.Second * 1,
+	// Лимитированные попытки
+	limTryOpts := workflow.ActivityOptions{
+		StartToCloseTimeout: time.Second * 2,
 		RetryPolicy: &temporal.RetryPolicy{
-			MaximumAttempts: 1,
+			MaximumAttempts: 3,
 		},
 	}
-	onceTryCtx := workflow.WithActivityOptions(ctx, onceTryOpts)
+	onceTryCtx := workflow.WithActivityOptions(ctx, limTryOpts)
 
-	//Бесконечный попытки пока не будет успеха или ответа 4xx
+	// Бесконечный попытки пока не будет успеха или ответа 4xx
 	unlimTryOpts := workflow.ActivityOptions{
-		StartToCloseTimeout: time.Second * 1,
+		StartToCloseTimeout: time.Second * 2,
 		RetryPolicy: &temporal.RetryPolicy{
 			InitialInterval:    time.Second * 1,
 			BackoffCoefficient: 2.0,
@@ -62,7 +63,7 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 
 	if input.OrderProducts != nil {
 
-		//Получим текущий список заблокированных товаров у заказа (если есть)
+		// Получим текущий список заблокированных товаров у заказа (если есть)
 		err := workflow.ExecuteActivity(onceTryCtx, "GetOrderBlockedProductsByOrderID", input.OrderID).Get(onceTryCtx, &currentOrderBlockedProducts)
 		if err != nil {
 			infBadInput := activities.InformOrdersServiceAboutOrderCompositionIn{
@@ -70,7 +71,7 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 				IsOk:    false,
 			}
 
-			//Уведомим микросервис заказов о неуспешном обращении к микросервису товаров
+			// Уведомим микросервис заказов о неуспешном обращении к микросервису товаров
 			_ = workflow.ExecuteActivity(unlimTryCtx, "InformOrdersServiceAboutOrderComposition", infBadInput).Get(unlimTryCtx, nil)
 
 			return &SetOrderProductsAndStatusOut{
@@ -92,7 +93,7 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 
 		err = workflow.ExecuteActivity(onceTryCtx, "SetOrderBlockedProductsByOrderID", blockInput).Get(onceTryCtx, nil)
 		if err != nil {
-			//Если при блокировке истек таймаут или 500 - мы не знаем заблокировалось или нет, нужно отменять пока не будет успех
+			// Если при блокировке истек таймаут или 500 - мы не знаем заблокировалось или нет, нужно отменять пока не будет успех
 			needToCancel := false
 
 			if ok, lgErr := e2temperr.TempErrConvertToLogicError(err); ok {
@@ -104,7 +105,7 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 			}
 
 			if needToCancel {
-				//Возвращаем блокированные товары назад
+				// Возвращаем блокированные товары назад
 				cancelBlockInput := activities.SetOrderBlockedProductsByOrderIDIn{
 					OrderID: input.OrderID,
 					OrderProducts: lo.Map(currentOrderBlockedProducts, func(item *productscl.OrderBlockedProduct, _ int) activities.SetOrderBlockedProductsByOrderIDItem {
@@ -122,7 +123,7 @@ func SetOrderProductsAndStatus(ctx workflow.Context, input SetOrderProductsAndSt
 				IsOk:    false,
 			}
 
-			//Уведомим микросервис заказов о неуспешном блокировании товаров
+			// Уведомим микросервис заказов о неуспешном блокировании товаров
 			_ = workflow.ExecuteActivity(unlimTryCtx, "InformOrdersServiceAboutOrderComposition", infBadInput).Get(unlimTryCtx, nil)
 
 			return &SetOrderProductsAndStatusOut{

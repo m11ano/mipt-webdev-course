@@ -12,6 +12,13 @@ import (
 
 var ErrSetOrderProductsAndStatusCantReserve = e.NewErrorFrom(e.ErrBadRequest).SetMessage("can't reserve product")
 var ErrSetOrderProductsAndStatusEmptyRequest = e.NewErrorFrom(e.ErrBadRequest).SetMessage("empty request")
+var ErrSetOrderProductsAndStatusTimeout = e.NewErrorFrom(e.ErrBadRequest).SetMessage("req timeout")
+
+type SetOrderProductsAndStatusFlowResult struct {
+	we     tclient.WorkflowRun
+	result workflows.SetOrderProductsAndStatusOut
+	err    error
+}
 
 func (c *ClientImpl) SetOrderProductsAndStatus(ctx context.Context, input SetOrderProductsAndStatusIn) error {
 	options := tclient.StartWorkflowOptions{
@@ -40,32 +47,57 @@ func (c *ClientImpl) SetOrderProductsAndStatus(ctx context.Context, input SetOrd
 		workIn.OrderStatus = input.OrderStatus
 	}
 
-	we, err := c.client.ExecuteWorkflow(ctx, options, workflows.SetOrderProductsAndStatus, workIn)
-	if err != nil {
-		return e.NewErrorFrom(ErrWorkflowCantStart).Wrap(err)
-	}
+	execCtx := context.Background()
 
-	if input.NotWait {
+	startCh := make(chan SetOrderProductsAndStatusFlowResult, 1)
+
+	go func() {
+		we, err := c.client.ExecuteWorkflow(execCtx, options, workflows.SetOrderProductsAndStatus, workIn)
+		if err != nil {
+			startCh <- SetOrderProductsAndStatusFlowResult{err: e.NewErrorFrom(ErrWorkflowCantStart).Wrap(err)}
+			return
+		}
+
+		if input.NotWait {
+			startCh <- SetOrderProductsAndStatusFlowResult{we: we}
+			return
+		}
+
+		var result workflows.SetOrderProductsAndStatusOut
+
+		err = we.Get(execCtx, &result)
+		if err != nil {
+			startCh <- SetOrderProductsAndStatusFlowResult{err: e.NewErrorFrom(ErrWorkflowResutError).Wrap(err)}
+			return
+		}
+
+		startCh <- SetOrderProductsAndStatusFlowResult{we: we, result: result}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return e.NewErrorFrom(ErrSetOrderProductsAndStatusTimeout).Wrap(ctx.Err())
+	case res := <-startCh:
+		if res.err != nil {
+			return res.err
+		}
+
+		if input.NotWait {
+			return nil
+		}
+
+		if !res.result.IsOk {
+			if res.result.ErrorCode == 1 {
+				return ErrSetOrderProductsAndStatusCantReserve
+			}
+
+			if res.result.ErrorCode == 2 {
+				return ErrSetOrderProductsAndStatusEmptyRequest
+			}
+
+			return e.NewErrorFrom(ErrWorkflowResutError)
+		}
+
 		return nil
 	}
-
-	var result workflows.SetOrderProductsAndStatusOut
-	err = we.Get(ctx, &result)
-	if err != nil {
-		return e.NewErrorFrom(ErrWorkflowResutError).Wrap(err)
-	}
-
-	if !result.IsOk {
-		if result.ErrorCode == 1 {
-			return ErrSetOrderProductsAndStatusCantReserve
-		}
-
-		if result.ErrorCode == 2 {
-			return ErrSetOrderProductsAndStatusEmptyRequest
-		}
-
-		return e.NewErrorFrom(ErrWorkflowResutError).Wrap(err)
-	}
-
-	return nil
 }

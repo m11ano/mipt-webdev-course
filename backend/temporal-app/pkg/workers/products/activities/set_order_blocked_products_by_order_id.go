@@ -36,5 +36,7 @@ func (c *Controller) SetOrderBlockedProductsByOrderID(ctx context.Context, in Se
 		return e2temperr.ErrToTempErr(err)
 	}
 
+	c.logger.Info("set order blocked products by order id", slog.Int64("order_id", in.OrderID))
+
 	return nil
 }
