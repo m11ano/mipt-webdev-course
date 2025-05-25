@@ -19,6 +19,10 @@ export const useCartStore = defineStore('shop_cart', {
         },
     },
     actions: {
+        getProductQuantity(id: number): number {
+            const item = this.items.find((i) => i.id === id);
+            return item ? item.quantity : 0;
+        },
         add(id: number, quantity: number = 1) {
             const existing = this.items.find((i) => i.id === id);
             if (existing) {

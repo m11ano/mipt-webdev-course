@@ -1,44 +1,32 @@
 <script setup lang="ts">
-import { useModalAlert } from '~/components/shared/modals/Alert/useModalAlert';
 import { useModalErrorsList } from '~/components/shared/modals/ErrorsList/useModalErrorsList';
 import { StandartErrorList } from '~/shared/errors/errors';
-import CardOrderSuccess from './CardOrderSuccess.vue';
 import { useCartStore } from '~/domain/shop';
-
-interface OrderFormData {
-    client_name: string;
-    client_surname: string;
-    client_email: string;
-    client_phone: string;
-    delivery_address: string;
-}
+import type { IOrderDetailsFormData, IOrderFormData } from './model/types/types';
+import { fetchCreateOrder } from './api/fetchCreateOrder';
+import { useOrderResult } from './modals/OrderResult/hooks';
 
 const cartStore = useCartStore();
 
-const orderFormData = ref<OrderFormData>({
-    client_name: '',
-    client_surname: '',
-    client_email: '',
-    client_phone: '',
-    delivery_address: '',
+const orderFormData = ref<IOrderDetailsFormData>({
+    client_name: '1',
+    client_surname: '2',
+    client_email: '1@yandex.com',
+    client_phone: '+7 (903) 000-00-00',
+    delivery_address: '111',
 });
 
 const errors = ref<string[]>([]);
 const isPhoneComplete = ref(false);
 
-const orderID = ref(1000);
-const orderLink = ref('/order-1000-xmth9s3mvo');
+const orderID = ref(0);
+const orderLink = ref('');
+const isLoaded = ref(false);
 
-const successModal = useModalAlert({
-    slot: () =>
-        h(CardOrderSuccess, {
-            orderID: orderID.value,
-            link: orderLink.value,
-        }),
-    title: 'Заказ создан',
-    onConfirm: () => {
-        navigateTo(orderLink.value);
-    },
+const resultModal = useOrderResult({
+    orderID,
+    link: orderLink,
+    isLoaded: isLoaded,
 });
 
 const errorModal = useModalErrorsList({
@@ -71,17 +59,43 @@ const sendForm = async (e: Event) => {
     if (errors.value.length) {
         errorModal.open();
     } else {
+        const sendData: IOrderFormData = {
+            products: cartStore.items.map((item) => ({
+                id: item.id,
+                quantity: item.quantity,
+            })),
+            details: {
+                client_email: orderFormData.value.client_email,
+                client_name: orderFormData.value.client_name,
+                client_phone: orderFormData.value.client_phone,
+                client_surname: orderFormData.value.client_surname,
+                delivery_address: orderFormData.value.delivery_address,
+            },
+        };
+
         isSending.value = true;
+        isLoaded.value = false;
+        resultModal.open();
+
         try {
-            cartStore.clear();
-            successModal.open();
+            await setTimeout(() => {}, 3000);
+            const result = await fetchCreateOrder(sendData);
+
+            setTimeout(() => {
+                orderID.value = result.id;
+                orderLink.value = `/order-${result.id}-${result.secret_key}`;
+                //cartStore.clear();
+                isLoaded.value = true;
+            }, 500);
         } catch (e) {
+            resultModal.close();
             if (e instanceof StandartErrorList) {
                 errors.value = e.details;
                 errorModal.open();
             }
         } finally {
             isSending.value = false;
+            isLoaded.value = false;
         }
     }
 };

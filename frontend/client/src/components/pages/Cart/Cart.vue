@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCartStore } from '~/domain/shop';
-import { mockProductsList } from '~/mocks/products';
+import type { IProductListItem } from '~/domain/shop/model/types/product';
 
 useHead({
     title: 'Корзина',
@@ -8,31 +8,38 @@ useHead({
 
 const cartStore = useCartStore();
 
-const productsData = computed(() => {
-    return mockProductsList.filter((i) => cartStore.productIDs.includes(i.id));
+const productsIDs = computed(() => cartStore.items.map((i) => i.id));
+
+const productApiUrl = computed(() => `/products?ids=${productsIDs.value.join(',')}`);
+
+const { data: productsItems, execute } = await useAPIFetch<{ items: IProductListItem[] }>(productApiUrl, {
+    lazy: true,
+    immediate: false,
 });
 
-onMounted(() => {
-    cartStore.filterByIDs(productsData.value.map((i) => i.id));
-});
+// setTimeout(() => {
+//     execute();
+// }, 3000);
+
+execute();
 </script>
 
 <template>
     <div>
         <div :id="$style.block_basket">
             <div :class="$style.title">Корзина</div>
-            <template v-if="productsData.length == 0">
+            <template v-if="cartStore.items.length == 0">
                 <div :class="$style.empty_title">Корзина пуста</div>
             </template>
             <template v-else>
                 <div :class="$style.basket">
-                    <WidgetCartBasket :products-data="productsData" />
+                    <WidgetCartBasket :products-items="productsItems?.items || []" />
                 </div>
             </template>
         </div>
         <div
             :id="$style.block_order"
-            :style="{ display: productsData.length == 0 ? 'none' : 'block' }"
+            :style="{ display: cartStore.items.length == 0 ? 'none' : 'block' }"
         >
             <div>
                 <div :class="$style.title">Оформление заказа</div>

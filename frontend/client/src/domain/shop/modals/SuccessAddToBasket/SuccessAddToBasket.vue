@@ -1,25 +1,48 @@
 <script setup lang="ts">
 import type { UseModalReturnType } from 'vue-final-modal';
 import type { IProductItem } from '../../model/types/product';
-import { mockProductsList } from '~/mocks/products';
 import { coolNumber } from '~/shared/helpers/functions';
 
 const props = defineProps<{
     title: MaybeRef<string>;
     modalObj: () => UseModalReturnType<any>;
     productID: number;
+    checkAvailability: (product: IProductItem) => boolean;
 }>();
 
-const isLoading = ref(true);
+const productApiUrl = computed(() => `/products/${props.productID}`);
 
-const product = ref<IProductItem | null>(null);
-
-onMounted(() => {
-    setTimeout(() => {
-        product.value = mockProductsList.find((item) => item.id === props.productID) || null;
-        isLoading.value = false;
-    }, 1000);
+const { data: product, error } = await useAPIFetch<IProductItem>(productApiUrl, {
+    lazy: false,
 });
+
+const isAvailableStatus = ref<'loading' | 'success' | 'error'>('loading');
+
+const isLoading = computed(() => isAvailableStatus.value === 'loading' || product.value === null);
+
+watch(
+    error,
+    () => {
+        if (error.value) {
+            props.modalObj().close();
+        }
+    },
+    { immediate: true },
+);
+
+watch(
+    product,
+    () => {
+        if (product.value) {
+            if (props.checkAvailability(product.value)) {
+                isAvailableStatus.value = 'success';
+            } else {
+                isAvailableStatus.value = 'error';
+            }
+        }
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
@@ -30,25 +53,33 @@ onMounted(() => {
                 :modal-obj="props.modalObj()"
                 :class-name="$style.box_wrapper"
             >
-                <template #title>{{ title }}</template>
+                <template #title>
+                    <template v-if="isAvailableStatus === 'success'">{{ title }}</template>
+                    <template v-else>Ошибка</template>
+                </template>
                 <template #content>
-                    <div :class="$style.content">
-                        <div :class="$style.img">
-                            <img
-                                v-if="product?.image_preview"
-                                :src="product?.image_preview"
-                                :alt="product?.name"
-                                :title="product?.name"
-                            />
-                            <span></span>
-                        </div>
-                        <div :class="$style.text">
-                            <div :class="$style.name">
-                                {{ product?.name }}
+                    <template v-if="isAvailableStatus === 'success'">
+                        <div :class="$style.content">
+                            <div :class="$style.img">
+                                <img
+                                    v-if="product?.image_preview"
+                                    :src="product?.image_preview"
+                                    :alt="product?.name"
+                                    :title="product?.name"
+                                />
+                                <span></span>
                             </div>
-                            <div :class="$style.price">{{ coolNumber(product?.price || 0) }} ₽</div>
+                            <div :class="$style.text">
+                                <div :class="$style.name">
+                                    {{ product?.name }}
+                                </div>
+                                <div :class="$style.price">{{ coolNumber(product?.price || 0) }} ₽</div>
+                            </div>
                         </div>
-                    </div>
+                    </template>
+                    <template v-else>
+                        <div>Товар заканчивается, вы добавили в корзину максимально доступное количество</div>
+                    </template>
                 </template>
                 <template #buttons>
                     <button
@@ -57,12 +88,14 @@ onMounted(() => {
                     >
                         Продолжить покупки
                     </button>
+
                     <NuxtLink
                         to="/cart"
                         class="button_1"
                         @click="modalObj().close()"
                     >
-                        Оформить заказ
+                        <template v-if="isAvailableStatus === 'success'">Оформить заказ</template>
+                        <template v-else>Перейти в корзину</template>
                     </NuxtLink>
                 </template>
             </SharedModalsDefaultWrapper>

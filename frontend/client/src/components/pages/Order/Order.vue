@@ -1,12 +1,33 @@
 <script setup lang="ts">
+import { OrderStatusText, type IOrder } from '~/domain/shop/model/types/order';
+import { coolNumber } from '~/shared/helpers/functions';
+
 const props = defineProps<{ orderID: number; secretKey: string }>();
 
-if (props.secretKey.length == 0) {
-    throw createError({ statusCode: 404, statusMessage: 'Order not found' });
-}
+const orderApiUrl = computed(() => `/orders/${props.orderID}/${props.secretKey}`);
 
-useHead({
-    title: `Заказ №${props.orderID}`,
+const { data: order, error } = await useAPIFetch<IOrder>(orderApiUrl, {
+    lazy: true,
+});
+
+watch(
+    error,
+    () => {
+        if (error.value) {
+            throw createError({ statusCode: 404, statusMessage: 'Заказ не найден' });
+        }
+    },
+    {
+        immediate: true,
+    },
+);
+
+watch(order, () => {
+    if (order.value) {
+        useHead({
+            title: `Заказ №${order.value.id}`,
+        });
+    }
 });
 </script>
 
@@ -22,7 +43,17 @@ useHead({
                     </div>
                     <div>
                         <div :class="$style.title">Статус:</div>
-                        <div :class="$style.value">Ожидает обработки</div>
+                        <div :class="$style.value">
+                            <template v-if="order?.status">{{ OrderStatusText[order.status] }}</template
+                            ><template v-else>Загрузка</template>
+                        </div>
+                    </div>
+                    <div>
+                        <div :class="$style.title">Сумма:</div>
+                        <div :class="$style.value">
+                            <template v-if="order?.status">{{ coolNumber(order.order_sum) }} руб.</template
+                            ><template v-else>Загрузка</template>
+                        </div>
                     </div>
                 </div>
             </div>

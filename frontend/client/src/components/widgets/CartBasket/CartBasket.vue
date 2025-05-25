@@ -4,23 +4,39 @@ import { useCartStore } from '~/domain/shop';
 import type { IProductListItem } from '~/domain/shop/model/types/product';
 import { coolNumber } from '~/shared/helpers/functions';
 
-const props = defineProps<{ productsData: IProductListItem[] }>();
+const props = defineProps<{ productsItems: IProductListItem[] }>();
 
 const cartStore = useCartStore();
 
 interface ProductInCart {
-    product: IProductListItem;
+    productID: number;
     quantity: number;
 }
+
+const productsMap = computed(() => {
+    const result: Record<number, IProductListItem> = {};
+
+    if (props.productsItems) {
+        props.productsItems.forEach((item) => {
+            result[item.id] = item;
+        });
+    }
+
+    return result;
+});
+
+const getProduct = (id: number) => {
+    if (typeof productsMap.value[id] === 'undefined') {
+        return null;
+    }
+    return productsMap.value[id];
+};
 
 const products = computed<ProductInCart[]>(() => {
     const result: ProductInCart[] = [];
     cartStore.items.forEach((item) => {
-        const product = props.productsData.find((i) => i.id === item.id);
-        if (!product) return;
-
         result.push({
-            product,
+            productID: item.id,
             quantity: item.quantity,
         });
     });
@@ -32,17 +48,20 @@ const setQuantity = (id: number, quantity: number) => {
     if (isNaN(quantity) || quantity < 1) {
         quantity = 1;
     }
-    const productsDataItem = props.productsData.find((i) => i.id === id);
-    if (!productsDataItem) return;
 
-    quantity = Math.min(quantity, productsDataItem.stock_available);
+    if (!getProduct(id)) return;
+
+    quantity = Math.min(quantity, getProduct(id)!.stock_available);
     cartStore.setQuantity(id, quantity);
 };
 
 const total = computed(() => {
     let total = 0;
     products.value.forEach((item) => {
-        total += item.product.price * item.quantity;
+        const product = getProduct(item.productID);
+        if (product) {
+            total += product.price * item.quantity;
+        }
     });
     return total;
 });
@@ -63,55 +82,94 @@ const removeProduct = (id: number) => {
         <div :class="$style.products">
             <template
                 v-for="item in products"
-                :key="item.product.id"
+                :key="item.productID"
             >
                 <div>
-                    <NuxtLink
-                        :class="$style.img"
-                        :to="`/product-${item.product.id}`"
-                    >
-                        <img
-                            v-if="item.product.image_preview"
-                            :src="item.product.image_preview"
-                            :alt="item.product.name"
-                            :title="item.product.name"
-                            loading="lazy"
-                        />
-                        <span></span>
-                    </NuxtLink>
+                    <template v-if="getProduct(item.productID)">
+                        <NuxtLink
+                            :class="$style.img"
+                            :to="`/product-${item.productID}`"
+                        >
+                            <template v-if="getProduct(item.productID)">
+                                <img
+                                    v-if="getProduct(item.productID)?.image_preview"
+                                    :src="getProduct(item.productID)?.image_preview"
+                                    :alt="getProduct(item.productID)?.name"
+                                    :title="getProduct(item.productID)?.name"
+                                    loading="lazy"
+                                />
+                            </template>
+
+                            <span></span>
+                        </NuxtLink>
+                    </template>
+                    <template v-else>
+                        <div :class="$style.img">
+                            <div :class="['skeleton', 'bg', 'square']"><div></div></div>
+                        </div>
+                    </template>
                     <div :class="$style.info">
                         <div :class="$style.main_info">
-                            <div :class="$style.name">
-                                <NuxtLink :to="`/product-${item.product.id}`">
-                                    {{ item.product.name }}
-                                </NuxtLink>
-                            </div>
-                            <div :class="$style.price">{{ coolNumber(item.product.price) }} ₽</div>
-                            <div :class="$style.stock_available">
-                                <span :class="$style.title">Остаток на складе:</span>
-                                <template v-if="item.product?.stock_available">
-                                    <span :class="$style.available">{{ item.product?.stock_available }} шт.</span>
-                                </template>
-                                <template v-else>
-                                    <span :class="$style.not_available">нет в наличии</span>
-                                </template>
-                            </div>
+                            <template v-if="getProduct(item.productID)">
+                                <div :class="$style.name">
+                                    <NuxtLink :to="`/product-${item.productID}`">
+                                        {{ getProduct(item.productID)?.name }}
+                                    </NuxtLink>
+                                </div>
+                                <div :class="$style.price">{{ coolNumber(getProduct(item.productID)?.price || 0) }} ₽</div>
+                                <div :class="$style.stock_available">
+                                    <span :class="$style.title">Остаток на складе:</span>
+                                    <template v-if="getProduct(item.productID)?.is_published">
+                                        <template v-if="getProduct(item.productID)?.stock_available">
+                                            <span :class="$style.available">{{ getProduct(item.productID)?.stock_available }} шт.</span>
+                                        </template>
+                                        <template v-else>
+                                            <span :class="$style.not_available">нет в наличии</span>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        <span :class="$style.not_available">снято с продажи</span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <div
+                                    :class="['skeleton', 'bg']"
+                                    style="height: 40px"
+                                ></div>
+                            </template>
                         </div>
                         <div :class="$style.quantity">
-                            <SharedUiInput
-                                :model-value="item.quantity.toString()"
-                                type="number"
-                                :min="item.product.stock_available ? 1 : 0"
-                                :max="item.product.stock_available"
-                                :read-value-from-v-model-on-blur="true"
-                                @update:model-value="setQuantity(item.product.id, Number($event))"
-                            />
+                            <template v-if="getProduct(item.productID)">
+                                <SharedUiInput
+                                    :model-value="item.quantity.toString()"
+                                    type="number"
+                                    :min="getProduct(item.productID)?.stock_available && getProduct(item.productID)?.is_published ? 1 : 0"
+                                    :max="getProduct(item.productID)?.is_published ? getProduct(item.productID)?.stock_available : 0"
+                                    :read-value-from-v-model-on-blur="true"
+                                    @update:model-value="setQuantity(getProduct(item.productID)?.id || 0, Number($event))"
+                                />
+                            </template>
+                            <template v-else>
+                                <div
+                                    :class="['skeleton', 'bg']"
+                                    style="height: 40px"
+                                ></div>
+                            </template>
                         </div>
                         <div :class="$style.remove">
-                            <button
-                                title="Удалить"
-                                @click="removeProduct(item.product.id)"
-                            ></button>
+                            <template v-if="getProduct(item.productID)">
+                                <button
+                                    title="Удалить"
+                                    @click="removeProduct(getProduct(item.productID)?.id || 0)"
+                                ></button>
+                            </template>
+                            <template v-else>
+                                <div
+                                    :class="['skeleton', 'bg']"
+                                    style="height: 40px"
+                                ></div>
+                            </template>
                         </div>
                     </div>
                 </div>

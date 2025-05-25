@@ -13,7 +13,7 @@ const config: InputConfig<NuxtConfig, ConfigLayerMeta> = {
     devServer: {
         host: '0.0.0.0',
     },
-    ssr: true,
+    ssr: false,
     srcDir: 'src',
     alias: {
         '@styles': '/assets/styles',
