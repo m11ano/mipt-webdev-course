@@ -9,11 +9,11 @@ import { useOrderResult } from './modals/OrderResult/hooks';
 const cartStore = useCartStore();
 
 const orderFormData = ref<IOrderDetailsFormData>({
-    client_name: '1',
-    client_surname: '2',
-    client_email: '1@yandex.com',
-    client_phone: '+7 (903) 000-00-00',
-    delivery_address: '111',
+    client_name: '',
+    client_surname: '',
+    client_email: '',
+    client_phone: '',
+    delivery_address: '',
 });
 
 const errors = ref<string[]>([]);
