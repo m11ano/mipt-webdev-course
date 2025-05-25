@@ -1,7 +1,11 @@
 package controller
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/delivery/http/middleware"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/usecase"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/usecase/uctypes"
@@ -11,6 +15,7 @@ import (
 type GetProductsOutItem struct {
 	ID             int64   `json:"id"`
 	Name           string  `json:"name"`
+	IsPublished    bool    `json:"is_published"`
 	Price          float64 `json:"price"`
 	StockAvailable int32   `json:"stock_available"`
 	ImagePreview   string  `json:"image_preview"`
@@ -26,6 +31,7 @@ type GetProductsOut struct {
 // @Produce  json
 // @Param limit query int false "Limit"
 // @Param offset query int false "Offset"
+// @Param ids query string false "IDs of products, separated by comma. If not empty, then limit and offset will be ignored"
 // @Success 200 {object} GetProductsOut
 // @Failure 400 {object} middleware.ErrorJSON
 // @Router /products [get]
@@ -44,26 +50,48 @@ func (ctrl *Controller) GetProductsHandler(c *fiber.Ctx) error {
 		offset = 0
 	}
 
-	authData := middleware.ExtractAuthData(c)
-
-	var onlyIsPublished *bool
-
-	if !authData.IsAuth {
-		onlyIsPublished = lo.ToPtr(true)
+	IDsStr := c.Query("ids")
+	IDs := make([]int64, 0)
+	if IDsStr != "" {
+		IDsSeparated := strings.Split(IDsStr, ",")
+		for _, idStr := range IDsSeparated {
+			id, err := strconv.ParseInt(idStr, 10, 64)
+			if err != nil {
+				return e.NewErrorFrom(e.ErrBadRequest).Wrap(err).SetMessage("invalid ids")
+			}
+			IDs = append(IDs, id)
+		}
 	}
 
-	data, total, err := ctrl.productUC.FindFullPagedList(c.Context(), usecase.ProductListOptions{
-		IsPublished: onlyIsPublished,
+	authData := middleware.ExtractAuthData(c)
+
+	listSort := usecase.ProductListOptions{
 		Sort: &[]usecase.ProductListSort{
 			{
 				Field:  usecase.ProductListSortFieldCreatedAt,
 				IsDesc: true,
 			},
 		},
-	}, &uctypes.QueryGetListParams{
-		Limit:  uint64(limit),
-		Offset: uint64(offset),
-	})
+	}
+
+	if !authData.IsAuth && len(IDs) == 0 {
+		listSort.IsPublished = lo.ToPtr(true)
+	}
+
+	if len(IDs) > 0 {
+		listSort.IDs = &IDs
+		limit = 100
+	}
+
+	queryParams := &uctypes.QueryGetListParams{
+		Limit: uint64(limit),
+	}
+
+	if len(IDs) == 0 {
+		queryParams.Offset = uint64(offset)
+	}
+
+	data, total, err := ctrl.productUC.FindFullPagedList(c.Context(), listSort, queryParams)
 	if err != nil {
 		return err
 	}
@@ -79,6 +107,7 @@ func (ctrl *Controller) GetProductsHandler(c *fiber.Ctx) error {
 		result.Items[i] = GetProductsOutItem{
 			ID:             item.Product.ID,
 			Name:           item.Product.Name,
+			IsPublished:    item.Product.IsPublished,
 			Price:          price,
 			StockAvailable: item.Product.StockAvailable,
 		}

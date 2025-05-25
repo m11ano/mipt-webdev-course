@@ -36,6 +36,12 @@ const docTemplate = `{
                         "description": "Offset",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IDs of products, separated by comma. If not empty, then limit and offset will be ignored",
+                        "name": "ids",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -406,6 +412,9 @@ const docTemplate = `{
                 },
                 "image_preview": {
                     "type": "string"
+                },
+                "is_published": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"

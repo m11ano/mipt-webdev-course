@@ -68,6 +68,8 @@ definitions:
         type: integer
       image_preview:
         type: string
+      is_published:
+        type: boolean
       name:
         type: string
       price:
@@ -147,6 +149,11 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: IDs of products, separated by comma. If not empty, then limit
+          and offset will be ignored
+        in: query
+        name: ids
+        type: string
       produces:
       - application/json
       responses:
