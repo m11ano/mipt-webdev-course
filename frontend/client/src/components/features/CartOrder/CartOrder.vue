@@ -84,7 +84,7 @@ const sendForm = async (e: Event) => {
             setTimeout(() => {
                 orderID.value = result.id;
                 orderLink.value = `/order-${result.id}-${result.secret_key}`;
-                //cartStore.clear();
+                cartStore.clear();
                 isLoaded.value = true;
             }, 500);
         } catch (e) {
