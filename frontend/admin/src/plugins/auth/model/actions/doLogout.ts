@@ -4,4 +4,5 @@ import { clearAuthToken } from './authToken';
 export const doLogout = async (): Promise<void> => {
     clearAuthUserData();
     clearAuthToken();
+    navigateTo('/');
 };
