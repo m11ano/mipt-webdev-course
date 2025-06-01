@@ -6,6 +6,7 @@ import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import type { IProductListItem } from '~/modules/shop/domain/model/types/product';
 import { fetchProductsList } from '../../../domain/api/fetchProductsList';
 import { removeProduct } from '~/modules/shop/domain/actions/removeProduct';
+import { coolNumber } from '~/shared/helpers/functions';
 
 useSeoMeta({
     title: 'Список товаров',
@@ -77,7 +78,9 @@ const onPageUpdate = (p: number) => {
 
 watch(limit, () => {
     page.value = 1;
-    fetchData();
+    setTimeout(() => {
+        fetchData();
+    }, 100);
 });
 
 interface Product {
@@ -122,10 +125,6 @@ const columns: TableColumn<Product>[] = [
     {
         accessorKey: 'info',
         header: 'Товар',
-        cell(props) {
-            console.log(props);
-            return {};
-        },
     },
     {
         id: 'action',
@@ -198,7 +197,7 @@ onMounted(() => {
                     <div>
                         <b>{{ row.original.info.name }}</b>
                     </div>
-                    <div>Цена: {{ row.original.info.price }} руб.</div>
+                    <div>Цена: {{ coolNumber(row.original.info.price) }} руб.</div>
                     <div>Свободный остаток: {{ row.original.info.stock_available }} шт.</div>
                 </div>
             </template>

@@ -77,7 +77,9 @@ const onPageUpdate = (p: number) => {
 
 watch(limit, () => {
     page.value = 1;
-    fetchData();
+    setTimeout(() => {
+        fetchData();
+    }, 100);
 });
 
 interface Order {
