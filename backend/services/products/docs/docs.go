@@ -128,7 +128,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Тип изображения, enum: preview, slider",
                         "name": "image_type",
-                        "in": "formData",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -358,6 +358,17 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.FileOut": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.GetProductOut": {
             "type": "object",
             "properties": {
@@ -368,7 +379,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "image_preview": {
-                    "type": "string"
+                    "$ref": "#/definitions/controller.FileOut"
                 },
                 "is_published": {
                     "type": "boolean"
@@ -382,7 +393,7 @@ const docTemplate = `{
                 "slider": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/controller.FileOut"
                     }
                 },
                 "stock_available": {

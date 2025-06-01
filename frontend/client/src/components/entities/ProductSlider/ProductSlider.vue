@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
-    slider: string[];
+    slider: {
+        id: string;
+        url: string;
+    }[];
 }>();
 
 const nowSlideSelected = ref(0);
@@ -48,7 +51,7 @@ onUnmounted(() => {
         >
             <img
                 v-if="nowSlideItem"
-                :src="nowSlideItem"
+                :src="nowSlideItem.url"
                 alt=""
             />
             <span></span>
@@ -64,7 +67,7 @@ onUnmounted(() => {
                 >
                     <img
                         v-if="item"
-                        :src="item"
+                        :src="item.url"
                         alt=""
                         loading="lazy"
                     />

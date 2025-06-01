@@ -63,7 +63,7 @@ watch(
                             <div :class="$style.img">
                                 <img
                                     v-if="product?.image_preview"
-                                    :src="product?.image_preview"
+                                    :src="product?.image_preview.url"
                                     :alt="product?.name"
                                     :title="product?.name"
                                 />

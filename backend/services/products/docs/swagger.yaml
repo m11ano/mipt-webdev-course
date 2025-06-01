@@ -32,6 +32,13 @@ definitions:
       id:
         type: integer
     type: object
+  controller.FileOut:
+    properties:
+      id:
+        type: string
+      url:
+        type: string
+    type: object
   controller.GetProductOut:
     properties:
       full_description:
@@ -39,7 +46,7 @@ definitions:
       id:
         type: integer
       image_preview:
-        type: string
+        $ref: '#/definitions/controller.FileOut'
       is_published:
         type: boolean
       name:
@@ -48,7 +55,7 @@ definitions:
         type: number
       slider:
         items:
-          type: string
+          $ref: '#/definitions/controller.FileOut'
         type: array
       stock_available:
         type: integer
@@ -307,7 +314,7 @@ paths:
         required: true
         type: file
       - description: 'Тип изображения, enum: preview, slider'
-        in: formData
+        in: query
         name: image_type
         required: true
         type: string

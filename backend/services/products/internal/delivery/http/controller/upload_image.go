@@ -25,7 +25,7 @@ var imageTypes = map[string]domain.FileTarget{
 // @Tags products
 // @Accept  multipart/form-data
 // @Param file formData file true "Файл изображения"
-// @Param image_type formData string true "Тип изображения, enum: preview, slider"
+// @Param image_type query string true "Тип изображения, enum: preview, slider"
 // @Success 200 {object} UploadImageOut
 // @Failure 400 {object} middleware.ErrorJSON
 // @Router /products/image [post]
@@ -42,7 +42,7 @@ func (ctrl *Controller) UploadImageHandler(c *fiber.Ctx) error {
 		return e.NewErrorFrom(e.ErrBadRequest).Wrap(err).SetMessage("form field `file` is required")
 	}
 
-	imageType := c.FormValue("image_type")
+	imageType := c.Query("image_type")
 	imageTypeValue, ok := imageTypes[imageType]
 	if !ok {
 		return e.NewErrorFrom(e.ErrBadRequest).Wrap(err).SetMessage("form field `imageType` is invalid")

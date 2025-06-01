@@ -2,19 +2,25 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/m11ano/e"
 	"github.com/m11ano/mipt-webdev-course/backend/services/products/internal/delivery/http/middleware"
 )
 
+type FileOut struct {
+	ID  uuid.UUID `json:"id"`
+	URL string    `json:"url"`
+}
+
 type GetProductOut struct {
-	ID              int64    `json:"id"`
-	Name            string   `json:"name"`
-	IsPublished     bool     `json:"is_published"`
-	FullDescription string   `json:"full_description"`
-	Price           float64  `json:"price"`
-	StockAvailable  int32    `json:"stock_available"`
-	ImagePreview    string   `json:"image_preview"`
-	Slider          []string `json:"slider"`
+	ID              int64     `json:"id"`
+	Name            string    `json:"name"`
+	IsPublished     bool      `json:"is_published"`
+	FullDescription string    `json:"full_description"`
+	Price           float64   `json:"price"`
+	StockAvailable  int32     `json:"stock_available"`
+	ImagePreview    FileOut   `json:"image_preview"`
+	Slider          []FileOut `json:"slider"`
 }
 
 // @Summary Получить продукт по ID
@@ -51,15 +57,21 @@ func (ctrl *Controller) GetProductHandler(c *fiber.Ctx) error {
 		FullDescription: data.Product.FullDescription,
 		Price:           price,
 		StockAvailable:  data.Product.StockAvailable,
-		Slider:          make([]string, len(data.SliderFiles)),
+		Slider:          make([]FileOut, len(data.SliderFiles)),
 	}
 
 	if data.ProductPreviewFile != nil {
-		out.ImagePreview = data.ProductPreviewFile.GetURL(&ctrl.cfg)
+		out.ImagePreview = FileOut{
+			ID:  data.ProductPreviewFile.ID,
+			URL: data.ProductPreviewFile.GetURL(&ctrl.cfg),
+		}
 	}
 
 	for i, item := range data.SliderFiles {
-		out.Slider[i] = item.GetURL(&ctrl.cfg)
+		out.Slider[i] = FileOut{
+			ID:  item.ID,
+			URL: item.GetURL(&ctrl.cfg),
+		}
 	}
 
 	return c.JSON(out)

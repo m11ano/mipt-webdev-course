@@ -14,6 +14,12 @@ export interface IProductItem {
     full_description: string;
     price: number;
     stock_available: number;
-    image_preview: string;
-    slider: string[];
+    image_preview: {
+        id: string;
+        url: string;
+    };
+    slider: {
+        id: string;
+        url: string;
+    }[];
 }

@@ -1,0 +1,113 @@
+#auth_layout {
+    > .content {
+        .std-wrapper();
+        display: flex;
+        min-height: calc(100dvh - 70px);
+
+        .width-size-sm-less({
+            min-height: calc(100dvh - 50px);
+        });
+
+        > .side_menu {
+            display: block;
+            flex-shrink: 0;
+            width: 250px;
+            padding: 20px;
+            background-color: var(--ui-color-neutral-100);
+
+            .width-size-less(1250px, {
+                display: none;
+            });
+        }
+
+        > .main {
+            width: calc(100% - 250px);
+            padding: 20px 0 20px 30px;
+
+            .width-size-less(1250px, {
+                padding: 20px 0;
+                width: 100%;
+            });
+
+            .width-size-sm-less({
+                padding: 15px 0;
+            });
+
+            > .breadcrumbs {
+                background-color: var(--ui-color-neutral-200);
+                padding: 10px 15px;
+                border-radius: 6px;
+            }
+
+            > .wrapper {
+                margin-top: 20px;
+
+                .width-size-sm-less({
+                    margin-top: 15px;
+                });
+            }
+        }
+    }
+}
+
+#auth_header {
+    display: block;
+    flex-shrink: 0;
+    background-color: var(--ui-color-neutral-200);
+
+    > div {
+        .std-wrapper();
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 70px;
+
+        .width-size-sm-less({
+            height: 50px;
+        });
+
+        > .left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-left: 20px;
+
+            .width-size-less(1250px, {
+                padding-left: 0px;
+            });
+
+            > .logo {
+                > span {
+                    display: block;
+                    width: 39px;
+                    height: 36px;
+                    background: url('@/assets/images/logo.svg') no-repeat left top;
+                    background-size: auto 100%;
+                    font-size: 0;
+                }
+            }
+
+            > .menu {
+                display: none;
+
+                .width-size-less(1250px, {
+                    display: block;
+                });
+            }
+        }
+
+        > .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+
+            > .greet {
+                font-size: 16px;
+
+                .width-size-sm-less({
+                    display: none
+                });
+            }
+        }
+    }
+}

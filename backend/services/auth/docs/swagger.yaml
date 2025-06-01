@@ -23,6 +23,24 @@ definitions:
     - email
     - password
     type: object
+  controller.AuthLoginHandlerOut:
+    properties:
+      auth_user_data:
+        $ref: '#/definitions/controller.AuthLoginHandlerOutUserData'
+      token:
+        type: string
+    type: object
+  controller.AuthLoginHandlerOutUserData:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
   middleware.ErrorJSON:
     properties:
       code:
@@ -71,9 +89,9 @@ paths:
           $ref: '#/definitions/controller.AuthLoginHandlerIn'
       responses:
         "200":
-          description: JWT token
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/controller.AuthLoginHandlerOut'
         "400":
           description: Bad Request
           schema:

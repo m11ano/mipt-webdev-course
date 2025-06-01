@@ -67,9 +67,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "JWT token",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controller.AuthLoginHandlerOut"
                         }
                     },
                     "400": {
@@ -114,6 +114,34 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "maxLength": 150
+                }
+            }
+        },
+        "controller.AuthLoginHandlerOut": {
+            "type": "object",
+            "properties": {
+                "auth_user_data": {
+                    "$ref": "#/definitions/controller.AuthLoginHandlerOutUserData"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.AuthLoginHandlerOutUserData": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
                 }
             }
         },
