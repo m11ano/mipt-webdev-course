@@ -488,7 +488,7 @@ const removeProduct = async (productID: number) => {
                                 {{ orderProducts[product.id].name }}
                             </a>
                         </div>
-                        <div :class="$style.price"><span>Цена в заказе:</span> {{ coolNumber(orderProducts[product.id].price) }} руб.</div>
+                        <div :class="$style.price"><span>Цена в заказе:</span> {{ coolNumber(product.price) }} руб.</div>
                     </div>
                     <div :class="$style.quantity">
                         <div :class="$style.title">Количество (шт.):</div>
